@@ -1,0 +1,30 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "participant_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The two user IDs in this conversation"
+    },
+    "key": {
+      "type": "string",
+      "description": "Deterministic lookup key (sorted user IDs joined)"
+    },
+    "last_message_preview": {
+      "type": "string",
+      "description": "Preview of the last message"
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last message was sent (for sorting)"
+    }
+  },
+  "required": [
+    "participant_ids",
+    "key"
+  ]
+}

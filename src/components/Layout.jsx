@@ -1,12 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Gamepad2, Home, Compass, Settings, LogOut, Trophy } from 'lucide-react';
+import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { icon: Home, label: 'Feed', path: '/' },
   { icon: Compass, label: 'Explore', path: '/explore' },
+  { icon: MessagesSquare, label: 'Messages', path: '/messages' },
   { icon: Trophy, label: 'My Profile', path: '/profile' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];

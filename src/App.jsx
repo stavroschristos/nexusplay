@@ -12,6 +12,7 @@ import Home from '@/pages/Home';
 import Explore from '@/pages/Explore';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
+import Messages from '@/pages/Messages';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/messages" element={<Messages />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

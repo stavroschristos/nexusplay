@@ -8,10 +8,12 @@ import PostCard from '@/components/feed/PostCard';
 import GameAccountBadge from '@/components/profile/GameAccountBadge';
 import AchievementCard from '@/components/profile/AchievementCard';
 import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
   const { id } = useParams();
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   const profileId = id || currentUser?.id;
 
   const [profileUser, setProfileUser] = useState(null);
@@ -23,6 +25,7 @@ export default function Profile() {
   const [following, setFollowing] = useState(0);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('posts');
+  const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
     if (!profileId) return;
@@ -56,6 +59,25 @@ export default function Profile() {
       await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: profileId });
       setIsFollowing(true);
       setFollowers((f) => f + 1);
+    }
+  };
+
+  const startChat = async () => {
+    setStartingChat(true);
+    try {
+      const [a, b] = [currentUser.id, profileId].sort();
+      const key = `${a}_${b}`;
+      const existing = await base44.entities.Conversation.filter({ key });
+      let conv = existing[0];
+      if (!conv) {
+        conv = await base44.entities.Conversation.create({
+          participant_ids: [currentUser.id, profileId],
+          key,
+        });
+      }
+      navigate('/messages', { state: { conversationId: conv.id } });
+    } catch {
+      setStartingChat(false);
     }
   };
 
@@ -97,15 +119,27 @@ export default function Profile() {
               <Link to="/settings">Edit Profile</Link>
             </Button>
           ) : (
-            <Button
-              onClick={toggleFollow}
-              variant={isFollowing ? 'secondary' : 'default'}
-              size="sm"
-              className="rounded-full mb-2"
-            >
-              {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-              {isFollowing ? 'Following' : 'Follow'}
-            </Button>
+            <div className="flex gap-2 mb-2">
+              <Button
+                onClick={toggleFollow}
+                variant={isFollowing ? 'secondary' : 'default'}
+                size="sm"
+                className="rounded-full"
+              >
+                {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+                {isFollowing ? 'Following' : 'Follow'}
+              </Button>
+              <Button
+                onClick={startChat}
+                disabled={startingChat}
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+              >
+                {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
+                Message
+              </Button>
+            </div>
           )}
         </div>
 
