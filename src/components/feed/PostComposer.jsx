@@ -2,13 +2,14 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ImagePlus, Loader2, Send } from 'lucide-react';
+import { ImagePlus, Loader2, Send, Gamepad2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
 
-export default function PostComposer({ user, onPosted }) {
+export default function PostComposer({ user, onPosted, communityId }) {
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [gameTitle, setGameTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const fileRef = useRef(null);
   const { toast } = useToast();
@@ -33,12 +34,19 @@ export default function PostComposer({ user, onPosted }) {
     if (!content.trim()) return;
     setLoading(true);
     try {
+      let gameId = null;
+      if (gameTitle.trim()) {
+        const games = await base44.entities.Game.filter({ title: gameTitle.trim() });
+        if (games[0]) gameId = games[0].id;
+      }
       const post = await base44.entities.Post.create({
         content: content.trim(),
         image_url: imageUrl || undefined,
+        game_title: gameTitle.trim() || undefined,
+        game_id: gameId || undefined,
+        community_id: communityId || undefined,
       });
-      setContent('');
-      setImageUrl('');
+      setContent(''); setImageUrl(''); setGameTitle('');
       if (fileRef.current) fileRef.current.value = '';
       onPosted?.(post);
     } catch {
@@ -65,34 +73,24 @@ export default function PostComposer({ user, onPosted }) {
           {imageUrl && (
             <div className="relative mt-2 rounded-xl overflow-hidden">
               <img src={imageUrl} alt="" className="w-full max-h-72 object-cover" />
-              <button
-                onClick={() => setImageUrl('')}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white text-xs flex items-center justify-center hover:bg-black/80"
-              >
-                ✕
-              </button>
+              <button onClick={() => setImageUrl('')} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white text-xs flex items-center justify-center hover:bg-black/80">✕</button>
             </div>
           )}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-            <div className="flex items-center gap-1">
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => fileRef.current?.click()}
-                disabled={loading}
-                className="text-muted-foreground hover:text-primary"
-              >
-                <ImagePlus className="w-4 h-4" />
-                <span className="text-xs ml-1">Photo</span>
-              </Button>
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
+            <Button variant="ghost" size="sm" onClick={() => fileRef.current?.click()} disabled={loading} className="text-muted-foreground hover:text-primary">
+              <ImagePlus className="w-4 h-4" />
+            </Button>
+            <div className="flex items-center gap-1.5 flex-1">
+              <Gamepad2 className="w-4 h-4 text-muted-foreground shrink-0" />
+              <input
+                value={gameTitle}
+                onChange={(e) => setGameTitle(e.target.value)}
+                placeholder="Tag a game (optional)"
+                className="flex-1 h-8 bg-transparent text-xs placeholder:text-muted-foreground/60 focus-visible:outline-none"
+              />
             </div>
-            <Button
-              onClick={handleSubmit}
-              disabled={loading || !content.trim()}
-              size="sm"
-              className="rounded-full px-5"
-            >
+            <Button onClick={handleSubmit} disabled={loading || !content.trim()} size="sm" className="rounded-full px-5">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               <span className="ml-1">Post</span>
             </Button>

@@ -29,7 +29,80 @@
       "items": {
         "type": "string"
       },
-      "description": "List of favorite games"
+      "description": "Favorite game titles"
+    },
+    "favorite_franchises": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Favorite franchises"
+    },
+    "favorite_genres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Favorite genres"
+    },
+    "current_game": {
+      "type": "string",
+      "description": "Game currently playing"
+    },
+    "platforms_owned": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Platforms owned"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country"
+    },
+    "total_games_played": {
+      "type": "number",
+      "default": 0,
+      "description": "Total games played"
+    },
+    "total_hours_played": {
+      "type": "number",
+      "default": 0,
+      "description": "Total hours played"
+    },
+    "achievement_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Achievement score"
+    },
+    "platinum_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Platinum trophies"
+    },
+    "completion_percentage": {
+      "type": "number",
+      "default": 0,
+      "description": "Average completion %"
+    },
+    "rare_achievements": {
+      "type": "number",
+      "default": 0,
+      "description": "Rare achievements count"
+    },
+    "xp": {
+      "type": "number",
+      "default": 0,
+      "description": "Experience points"
+    },
+    "level": {
+      "type": "number",
+      "default": 1,
+      "description": "Gamer level"
+    },
+    "gaming_personality": {
+      "type": "string",
+      "description": "AI-generated gaming personality"
     }
   },
   "required": [

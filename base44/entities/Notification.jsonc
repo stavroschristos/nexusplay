@@ -1,0 +1,45 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "like",
+        "comment",
+        "follow",
+        "repost",
+        "reaction",
+        "achievement",
+        "mention",
+        "system"
+      ],
+      "description": "Notification type"
+    },
+    "content": {
+      "type": "string",
+      "description": "Notification message"
+    },
+    "link": {
+      "type": "string",
+      "description": "Where to navigate when clicked"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether notification has been read"
+    },
+    "actor_id": {
+      "type": "string",
+      "description": "User who triggered the notification"
+    },
+    "actor_name": {
+      "type": "string",
+      "description": "Actor display name (denormalized)"
+    }
+  },
+  "required": [
+    "type",
+    "content"
+  ]
+}

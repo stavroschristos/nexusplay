@@ -1,0 +1,52 @@
+{
+  "name": "Game",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Game title"
+    },
+    "cover_url": {
+      "type": "string",
+      "description": "Cover art URL"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Banner image URL"
+    },
+    "genres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Game genres"
+    },
+    "platforms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Available platforms"
+    },
+    "developer": {
+      "type": "string",
+      "description": "Developer"
+    },
+    "publisher": {
+      "type": "string",
+      "description": "Publisher"
+    },
+    "release_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Release date"
+    },
+    "description": {
+      "type": "string",
+      "description": "Game description"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

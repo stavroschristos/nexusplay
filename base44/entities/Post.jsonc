@@ -19,6 +19,48 @@
       "type": "number",
       "default": 0,
       "description": "Number of comments"
+    },
+    "reposts_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of reposts"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "activity",
+        "repost",
+        "quote",
+        "review_share",
+        "collection_share"
+      ],
+      "default": "text",
+      "description": "Post type"
+    },
+    "activity_type": {
+      "type": "string",
+      "description": "Type of activity (platinum, complete, playtime, rank, start)"
+    },
+    "game_title": {
+      "type": "string",
+      "description": "Game tagged in the post"
+    },
+    "game_id": {
+      "type": "string",
+      "description": "Linked game entity"
+    },
+    "community_id": {
+      "type": "string",
+      "description": "Community this post belongs to"
+    },
+    "repost_of_id": {
+      "type": "string",
+      "description": "Original post ID being reposted"
+    },
+    "quote_content": {
+      "type": "string",
+      "description": "Commentary added to a quote post"
     }
   },
   "required": [

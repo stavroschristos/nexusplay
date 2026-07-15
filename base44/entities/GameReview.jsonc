@@ -1,0 +1,38 @@
+{
+  "name": "GameReview",
+  "type": "object",
+  "properties": {
+    "game_id": {
+      "type": "string",
+      "description": "The game being reviewed"
+    },
+    "game_title": {
+      "type": "string",
+      "description": "Game title (denormalized)"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Rating 1-5",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "content": {
+      "type": "string",
+      "description": "Review text"
+    },
+    "spoiler": {
+      "type": "boolean",
+      "default": false,
+      "description": "Contains spoilers"
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of likes"
+    }
+  },
+  "required": [
+    "game_id",
+    "rating"
+  ]
+}

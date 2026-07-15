@@ -1,0 +1,46 @@
+{
+  "name": "Community",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Community name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Community description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Game",
+        "Genre",
+        "Console",
+        "Achievement Hunting",
+        "Speedrunning",
+        "Competitive",
+        "Retro",
+        "Indie",
+        "Other"
+      ],
+      "description": "Community category"
+    },
+    "icon_url": {
+      "type": "string",
+      "description": "Icon image URL"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Banner image URL"
+    },
+    "members_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of members"
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}

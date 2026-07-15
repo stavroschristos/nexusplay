@@ -1,0 +1,13 @@
+{
+  "name": "GameFollow",
+  "type": "object",
+  "properties": {
+    "game_id": {
+      "type": "string",
+      "description": "The game being followed"
+    }
+  },
+  "required": [
+    "game_id"
+  ]
+}

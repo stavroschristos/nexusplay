@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,8 +7,13 @@ import { Button } from '@/components/ui/button';
 import PostCard from '@/components/feed/PostCard';
 import GameAccountBadge from '@/components/profile/GameAccountBadge';
 import AchievementCard from '@/components/profile/AchievementCard';
-import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import GamingStats from '@/components/profile/GamingStats';
+import TrophyRoom from '@/components/profile/TrophyRoom';
+import GamingTimeline from '@/components/profile/GamingTimeline';
+import PersonalityBadge from '@/components/shared/PersonalityBadge';
+import CompatibilityScore, { calculateCompatibility } from '@/components/shared/CompatibilityScore';
+import CollectionCard from '@/components/shared/CollectionCard';
+import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap } from 'lucide-react';
 
 export default function Profile() {
   const { id } = useParams();
@@ -20,6 +25,9 @@ export default function Profile() {
   const [posts, setPosts] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [achievements, setAchievements] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [milestones, setMilestones] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
@@ -35,14 +43,20 @@ export default function Profile() {
       base44.entities.Post.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.GameAccount.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.Achievement.filter({ created_by_id: profileId }, '-earned_date', 50),
+      base44.entities.Collection.filter({ created_by_id: profileId }, '-created_date', 50),
+      base44.entities.GameReview.filter({ created_by_id: profileId }, '-created_date', 50),
+      base44.entities.Timeline.filter({ created_by_id: profileId }, '-year', 50),
       base44.entities.Follow.filter({ following_id: profileId }),
       base44.entities.Follow.filter({ follower_id: profileId }),
-    ]).then(([users, userPosts, userAccounts, userAch, followersList, followingList]) => {
+    ]).then(([users, userPosts, userAccounts, userAch, userCols, userReviews, userMilestones, followersList, followingList]) => {
       const u = users.find((x) => x.id === profileId) || (profileId === currentUser?.id ? currentUser : null);
       setProfileUser(u);
       setPosts(userPosts);
       setAccounts(userAccounts);
       setAchievements(userAch);
+      setCollections(userCols);
+      setReviews(userReviews);
+      setMilestones(userMilestones);
       setFollowers(followersList.length);
       setFollowing(followingList.length);
       setIsFollowing(followersList.some((f) => f.follower_id === currentUser?.id));
@@ -53,12 +67,14 @@ export default function Profile() {
     if (isFollowing) {
       const existing = await base44.entities.Follow.filter({ follower_id: currentUser.id, following_id: profileId });
       if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
-      setIsFollowing(false);
-      setFollowers((f) => f - 1);
+      setIsFollowing(false); setFollowers((f) => f - 1);
     } else {
       await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: profileId });
-      setIsFollowing(true);
-      setFollowers((f) => f + 1);
+      setIsFollowing(true); setFollowers((f) => f + 1);
+      await base44.entities.Notification.create({
+        type: 'follow', content: `${currentUser?.display_name || 'Someone'} started following you`, link: `/profile/${currentUser?.id}`,
+        actor_id: currentUser?.id, actor_name: currentUser?.display_name || currentUser?.full_name,
+      });
     }
   };
 
@@ -69,21 +85,12 @@ export default function Profile() {
       const key = `${a}_${b}`;
       const existing = await base44.entities.Conversation.filter({ key });
       let conv = existing[0];
-      if (!conv) {
-        conv = await base44.entities.Conversation.create({
-          participant_ids: [currentUser.id, profileId],
-          key,
-        });
-      }
+      if (!conv) conv = await base44.entities.Conversation.create({ participant_ids: [currentUser.id, profileId], key });
       navigate('/messages', { state: { conversationId: conv.id } });
-    } catch {
-      setStartingChat(false);
-    }
+    } catch { setStartingChat(false); }
   };
 
-  if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
-  }
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   if (!profileUser) {
     return (
@@ -96,18 +103,24 @@ export default function Profile() {
 
   const isOwn = profileId === currentUser?.id;
   const initials = (profileUser.display_name || profileUser.full_name || profileUser.email || 'G').charAt(0).toUpperCase();
+  const compatibility = isOwn ? 0 : calculateCompatibility(currentUser, profileUser);
+
+  const tabs = [
+    { key: 'posts', label: 'Posts', icon: MessageSquare, count: posts.length },
+    { key: 'trophy', label: 'Trophy Room', icon: Award, count: achievements.filter((a) => a.rarity === 'Legendary' || a.rarity === 'Epic').length },
+    { key: 'collections', label: 'Collections', icon: Layers, count: collections.length },
+    { key: 'reviews', label: 'Reviews', icon: Star, count: reviews.length },
+    { key: 'timeline', label: 'Timeline', icon: Trophy, count: milestones.length },
+    { key: 'stats', label: 'Stats', icon: Zap, count: null },
+  ];
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Banner */}
+    <div className="max-w-3xl mx-auto pb-12">
       <div className="h-40 md:h-56 bg-gradient-to-br from-primary/30 via-accent/20 to-background relative overflow-hidden">
-        {profileUser.banner_url && (
-          <img src={profileUser.banner_url} alt="" className="w-full h-full object-cover" />
-        )}
+        {profileUser.banner_url && <img src={profileUser.banner_url} alt="" className="w-full h-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
       </div>
 
-      {/* Profile Header */}
       <div className="px-4 -mt-12 md:-mt-14 relative">
         <div className="flex items-end justify-between">
           <Avatar className="w-24 h-24 md:w-28 md:h-28 ring-4 ring-background">
@@ -120,22 +133,11 @@ export default function Profile() {
             </Button>
           ) : (
             <div className="flex gap-2 mb-2">
-              <Button
-                onClick={toggleFollow}
-                variant={isFollowing ? 'secondary' : 'default'}
-                size="sm"
-                className="rounded-full"
-              >
+              <Button onClick={toggleFollow} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="rounded-full">
                 {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
                 {isFollowing ? 'Following' : 'Follow'}
               </Button>
-              <Button
-                onClick={startChat}
-                disabled={startingChat}
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-              >
+              <Button onClick={startChat} disabled={startingChat} variant="outline" size="sm" className="rounded-full">
                 {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
                 Message
               </Button>
@@ -144,70 +146,107 @@ export default function Profile() {
         </div>
 
         <div className="mt-3">
-          <h1 className="text-xl font-bold font-heading">{profileUser.display_name || profileUser.full_name || 'Gamer'}</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl font-bold font-heading">{profileUser.display_name || profileUser.full_name || 'Gamer'}</h1>
+            <PersonalityBadge personality={profileUser.gaming_personality} />
+          </div>
           <p className="text-sm text-muted-foreground">{profileUser.email}</p>
           {profileUser.bio && <p className="text-sm mt-2 text-foreground/80">{profileUser.bio}</p>}
+
+          {profileUser.current_game && (
+            <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-emerald-300">Now playing:</span>
+              <span className="font-medium">{profileUser.current_game}</span>
+            </div>
+          )}
 
           <div className="flex gap-5 mt-3 text-sm">
             <span><strong>{posts.length}</strong> <span className="text-muted-foreground">Posts</span></span>
             <span><strong>{followers}</strong> <span className="text-muted-foreground">Followers</span></span>
             <span><strong>{following}</strong> <span className="text-muted-foreground">Following</span></span>
+            {!isOwn && compatibility > 0 && (
+              <span className="flex items-center gap-1.5">
+                <CompatibilityScore score={compatibility} size="sm" />
+                <span className="text-muted-foreground">Compatibility</span>
+              </span>
+            )}
           </div>
+
+          {(profileUser.favorite_genres?.length > 0 || profileUser.favorite_franchises?.length > 0 || profileUser.platforms_owned?.length > 0) && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {profileUser.platforms_owned?.map((p) => (
+                <span key={p} className="px-2 py-0.5 rounded-md bg-primary/10 text-xs text-primary">{p}</span>
+              ))}
+              {profileUser.favorite_genres?.map((g) => (
+                <span key={g} className="px-2 py-0.5 rounded-md bg-secondary/60 text-xs text-muted-foreground">{g}</span>
+              ))}
+              {profileUser.favorite_franchises?.map((f) => (
+                <span key={f} className="px-2 py-0.5 rounded-md bg-secondary/60 text-xs text-muted-foreground">{f}</span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 px-4 mt-6 border-b border-border">
-        {[
-          { key: 'posts', label: 'Posts', icon: MessageSquare },
-          { key: 'accounts', label: 'Game Accounts', icon: Gamepad2 },
-          { key: 'achievements', label: 'Achievements', icon: Trophy },
-        ].map((t) => (
+      <div className="flex gap-1 px-4 mt-6 border-b border-border overflow-x-auto scrollbar-thin">
+        {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
               tab === t.key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <t.icon className="w-4 h-4" />
             {t.label}
+            {t.count !== null && t.count > 0 && <span className="text-xs text-muted-foreground">{t.count}</span>}
           </button>
         ))}
       </div>
 
-      {/* Tab Content */}
-      <div className="px-4 py-6 pb-12">
+      <div className="px-4 py-6">
         {tab === 'posts' && (
-          posts.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">No posts yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {posts.map((p) => <PostCard key={p.id} post={p} author={profileUser} />)}
+          posts.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No posts yet.</p> : (
+            <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} author={profileUser} />)}</div>
+          )
+        )}
+        {tab === 'trophy' && <TrophyRoom achievements={achievements} />}
+        {tab === 'stats' && <GamingStats user={profileUser} achievements={achievements} />}
+        {tab === 'collections' && (
+          collections.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No collections yet.</p> : (
+            <div className="grid sm:grid-cols-2 gap-4">{collections.map((c) => <CollectionCard key={c.id} collection={c} />)}</div>
+          )
+        )}
+        {tab === 'reviews' && (
+          reviews.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No reviews yet.</p> : (
+            <div className="space-y-3">
+              {reviews.map((r) => (
+                <div key={r.id} className="rounded-xl border border-border bg-card/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <Link to={`/games/${r.game_id}`} className="font-semibold text-sm hover:text-primary">{r.game_title}</Link>
+                    <div className="flex">{[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-amber-400 fill-current' : 'text-muted-foreground/30'}`} />)}</div>
+                  </div>
+                  {r.content && <p className="text-sm text-muted-foreground mt-2">{r.content}</p>}
+                </div>
+              ))}
             </div>
           )
         )}
-
-        {tab === 'accounts' && (
-          accounts.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">No game accounts linked.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-3">
-              {accounts.map((a) => <GameAccountBadge key={a.id} account={a} />)}
-            </div>
-          )
-        )}
-
-        {tab === 'achievements' && (
-          achievements.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">No achievements shared yet.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-3">
-              {achievements.map((a) => <AchievementCard key={a.id} achievement={a} />)}
-            </div>
-          )
-        )}
+        {tab === 'timeline' && <GamingTimeline milestones={milestones} />}
       </div>
+
+      {/* Game accounts */}
+      {accounts.length > 0 && (
+        <div className="px-4 pb-6">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+            <Gamepad2 className="w-4 h-4" /> Connected Accounts
+          </h3>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {accounts.map((a) => <GameAccountBadge key={a.id} account={a} />)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

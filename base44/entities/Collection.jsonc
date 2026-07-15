@@ -1,0 +1,43 @@
+{
+  "name": "Collection",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Collection title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Collection description"
+    },
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Game titles in this collection"
+    },
+    "cover_url": {
+      "type": "string",
+      "description": "Cover image URL"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether collection is public"
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of likes"
+    },
+    "comments_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of comments"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

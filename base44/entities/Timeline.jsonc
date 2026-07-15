@@ -1,0 +1,35 @@
+{
+  "name": "Timeline",
+  "type": "object",
+  "properties": {
+    "year": {
+      "type": "number",
+      "description": "Year of the milestone"
+    },
+    "title": {
+      "type": "string",
+      "description": "Milestone title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Milestone description"
+    },
+    "icon": {
+      "type": "string",
+      "enum": [
+        "trophy",
+        "game",
+        "rank",
+        "hours",
+        "complete",
+        "start"
+      ],
+      "default": "game",
+      "description": "Icon type"
+    }
+  },
+  "required": [
+    "year",
+    "title"
+  ]
+}

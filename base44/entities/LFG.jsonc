@@ -1,0 +1,61 @@
+{
+  "name": "LFG",
+  "type": "object",
+  "properties": {
+    "game": {
+      "type": "string",
+      "description": "Game to play"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform"
+    },
+    "region": {
+      "type": "string",
+      "description": "Region"
+    },
+    "skill_level": {
+      "type": "string",
+      "enum": [
+        "Beginner",
+        "Casual",
+        "Intermediate",
+        "Advanced",
+        "Pro"
+      ],
+      "default": "Casual",
+      "description": "Skill level"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "Casual",
+        "Competitive"
+      ],
+      "default": "Casual",
+      "description": "Play mode"
+    },
+    "voice_chat": {
+      "type": "boolean",
+      "default": false,
+      "description": "Voice chat required"
+    },
+    "schedule": {
+      "type": "string",
+      "description": "When to play"
+    },
+    "players_needed": {
+      "type": "number",
+      "default": 1,
+      "description": "Players needed"
+    },
+    "description": {
+      "type": "string",
+      "description": "Additional details"
+    }
+  },
+  "required": [
+    "game",
+    "platform"
+  ]
+}

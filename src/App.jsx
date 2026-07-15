@@ -13,6 +13,14 @@ import Explore from '@/pages/Explore';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
 import Messages from '@/pages/Messages';
+import Games from '@/pages/Games';
+import GameDetail from '@/pages/GameDetail';
+import Communities from '@/pages/Communities';
+import CommunityDetail from '@/pages/CommunityDetail';
+import CollectionDetail from '@/pages/CollectionDetail';
+import LFG from '@/pages/LFG';
+import Notifications from '@/pages/Notifications';
+import Wrapped from '@/pages/Wrapped';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -58,6 +66,14 @@ const AuthenticatedApp = () => {
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/games/:id" element={<GameDetail />} />
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/communities/:id" element={<CommunityDetail />} />
+          <Route path="/collections/:id" element={<CollectionDetail />} />
+          <Route path="/lfg" element={<LFG />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/wrapped" element={<Wrapped />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
