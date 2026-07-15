@@ -1,0 +1,37 @@
+{
+  "name": "GameAccount",
+  "type": "object",
+  "properties": {
+    "platform": {
+      "type": "string",
+      "enum": [
+        "PlayStation",
+        "Xbox",
+        "Steam",
+        "Nintendo",
+        "Epic Games",
+        "Riot",
+        "Battle.net"
+      ],
+      "description": "Gaming platform"
+    },
+    "username": {
+      "type": "string",
+      "description": "The gamer's username/handle on this platform"
+    },
+    "level": {
+      "type": "number",
+      "default": 0,
+      "description": "Player level on this platform"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this account is verified"
+    }
+  },
+  "required": [
+    "platform",
+    "username"
+  ]
+}

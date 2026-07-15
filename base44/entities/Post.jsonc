@@ -1,0 +1,27 @@
+{
+  "name": "Post",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "The text content of the post"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Optional image attached to the post"
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of likes"
+    },
+    "comments_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of comments"
+    }
+  },
+  "required": [
+    "content"
+  ]
+}

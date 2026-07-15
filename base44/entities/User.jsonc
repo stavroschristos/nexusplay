@@ -1,0 +1,40 @@
+{
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "The role of the user in the app",
+      "enum": [
+        "admin",
+        "user"
+      ]
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Gamer display name / handle"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile picture URL"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Profile banner image URL"
+    },
+    "favorite_games": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of favorite games"
+    }
+  },
+  "required": [
+    "role"
+  ],
+  "name": "User",
+  "type": "object"
+}

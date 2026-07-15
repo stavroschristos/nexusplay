@@ -1,0 +1,57 @@
+{
+  "name": "Achievement",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Achievement title"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the achievement is for"
+    },
+    "game": {
+      "type": "string",
+      "description": "The game this achievement is from"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "PlayStation",
+        "Xbox",
+        "Steam",
+        "Nintendo",
+        "Epic Games",
+        "Riot",
+        "Battle.net"
+      ],
+      "description": "Platform earned on"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Epic",
+        "Legendary"
+      ],
+      "default": "Common",
+      "description": "Rarity tier"
+    },
+    "icon_url": {
+      "type": "string",
+      "description": "Icon image for the achievement"
+    },
+    "earned_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the achievement was earned"
+    }
+  },
+  "required": [
+    "title",
+    "game",
+    "platform"
+  ]
+}

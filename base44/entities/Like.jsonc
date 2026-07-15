@@ -1,0 +1,13 @@
+{
+  "name": "Like",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "The post that was liked"
+    }
+  },
+  "required": [
+    "post_id"
+  ]
+}

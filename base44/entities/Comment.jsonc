@@ -1,0 +1,18 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "The post this comment belongs to"
+    },
+    "content": {
+      "type": "string",
+      "description": "The comment text"
+    }
+  },
+  "required": [
+    "post_id",
+    "content"
+  ]
+}
