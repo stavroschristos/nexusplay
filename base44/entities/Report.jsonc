@@ -1,0 +1,74 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "post",
+        "user",
+        "community",
+        "comment",
+        "message"
+      ],
+      "description": "Type of reported content"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID of the reported entity"
+    },
+    "target_name": {
+      "type": "string",
+      "description": "Display name of the target (denormalized for quick scan)"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "spam",
+        "harassment",
+        "nsfw",
+        "hate_speech",
+        "violence",
+        "scam",
+        "cheating",
+        "other"
+      ],
+      "description": "Reason for the report"
+    },
+    "details": {
+      "type": "string",
+      "description": "Additional context from the reporter"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewing",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "pending",
+      "description": "Review status"
+    },
+    "resolution_note": {
+      "type": "string",
+      "description": "Note left by the admin who resolved it"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Triage priority"
+    }
+  },
+  "required": [
+    "target_type",
+    "target_id",
+    "reason"
+  ]
+}

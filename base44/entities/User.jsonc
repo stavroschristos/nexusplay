@@ -60,6 +60,10 @@
       "type": "string",
       "description": "Country"
     },
+    "city": {
+      "type": "string",
+      "description": "City (for location analytics)"
+    },
     "total_games_played": {
       "type": "number",
       "default": 0,
@@ -103,6 +107,25 @@
     "gaming_personality": {
       "type": "string",
       "description": "AI-generated gaming personality"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "banned"
+      ],
+      "default": "active",
+      "description": "Account status for moderation"
+    },
+    "ban_reason": {
+      "type": "string",
+      "description": "Reason for suspension/ban"
+    },
+    "last_active": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last activity timestamp (for DAU/MAU & retention)"
     }
   },
   "required": [

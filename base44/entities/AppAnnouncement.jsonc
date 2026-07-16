@@ -1,0 +1,49 @@
+{
+  "name": "AppAnnouncement",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Announcement headline"
+    },
+    "message": {
+      "type": "string",
+      "description": "Announcement body text"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "update",
+        "maintenance"
+      ],
+      "default": "info",
+      "description": "Visual style of the banner"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this announcement is currently shown"
+    },
+    "dismissable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether users can dismiss the banner"
+    },
+    "starts_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the announcement becomes visible"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the announcement stops showing"
+    }
+  },
+  "required": [
+    "title",
+    "message"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "AnalyticsEvent",
+  "type": "object",
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "description": "Name of the tracked event (e.g. page_view, feature_use)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "feature_use",
+        "social",
+        "gaming",
+        "auth",
+        "error"
+      ],
+      "default": "feature_use",
+      "description": "Event category for grouping"
+    },
+    "feature_key": {
+      "type": "string",
+      "enum": [
+        "home",
+        "feed",
+        "profile",
+        "messages",
+        "communities",
+        "games",
+        "achievements",
+        "explore",
+        "lfg",
+        "challenges",
+        "radar",
+        "assistant",
+        "wrapped",
+        "notifications",
+        "settings",
+        "admin",
+        "other"
+      ],
+      "default": "other",
+      "description": "Which feature area the event belongs to"
+    },
+    "properties": {
+      "type": "object",
+      "description": "Flexible event metadata (page path, game id, etc.)"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Optional session identifier for retention analysis"
+    }
+  },
+  "required": [
+    "event_name"
+  ]
+}

@@ -25,6 +25,7 @@ import Radar from '@/pages/Radar';
 import Challenges from '@/pages/Challenges';
 import Assistant from '@/pages/Assistant';
 import Onboarding from '@/pages/Onboarding';
+import Admin from '@/pages/Admin';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -82,6 +83,7 @@ const AuthenticatedApp = () => {
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/assistant" element={<Assistant />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/admin" element={<Admin />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

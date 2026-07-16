@@ -3,7 +3,8 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { base44 } from '@/api/base44Client';
-import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles } from 'lucide-react';
+import { trackPageView } from '@/lib/analytics';
+import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -32,6 +33,12 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [announcement, setAnnouncement] = useState(null);
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
 
   useEffect(() => {
     base44.entities.Notification.filter({ read: false }).then((res) => setUnreadCount(res.length)).catch(() => {});
@@ -41,7 +48,24 @@ export default function Layout() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    base44.entities.AdminSettings.list('-created_date', 5).then((res) => {
+      if (res.length > 0 && res[0].announcement_active && res[0].announcement_title) {
+        setAnnouncement({ title: res[0].announcement_title, body: res[0].announcement_body, type: res[0].announcement_type || 'info' });
+      }
+    }).catch(() => {});
+  }, []);
+
+  const isAdmin = user?.role === 'admin';
+  const allNavItems = isAdmin ? [...navItems, { icon: ShieldAlert, label: 'Admin', path: '/admin' }] : navItems;
   const initials = (user?.display_name || user?.full_name || user?.email || 'G').charAt(0).toUpperCase();
+
+  const ANNOUNCEMENT_STYLES = {
+    info: 'bg-primary/10 border-primary/30 text-primary',
+    update: 'bg-chart-2/10 border-chart-2/30 text-chart-2',
+    warning: 'bg-chart-5/10 border-chart-5/30 text-chart-5',
+    maintenance: 'bg-destructive/10 border-destructive/30 text-destructive',
+  };
 
   const NavLink = ({ item, mobile = false }) => {
     const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
@@ -75,7 +99,7 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
-          {navItems.map((item) => <NavLink key={item.path} item={item} />)}
+          {allNavItems.map((item) => <NavLink key={item.path} item={item} />)}
           <div className="px-3 py-2 mt-2">
             <NavLink item={{ icon: Bell, label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, path: '/notifications' }} />
           </div>
@@ -105,6 +129,16 @@ export default function Layout() {
       </nav>
 
       <main className="flex-1 md:ml-64 pb-20 md:pb-0">
+        {announcement && !announcementDismissed && (
+          <div className={`mx-4 mt-4 p-3 rounded-xl border flex items-start gap-3 ${ANNOUNCEMENT_STYLES[announcement.type] || ANNOUNCEMENT_STYLES.info}`}>
+            <Megaphone className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">{announcement.title}</p>
+              {announcement.body && <p className="text-xs opacity-90 mt-0.5">{announcement.body}</p>}
+            </div>
+            <button onClick={() => setAnnouncementDismissed(true)} className="shrink-0 opacity-60 hover:opacity-100"><X className="w-4 h-4" /></button>
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

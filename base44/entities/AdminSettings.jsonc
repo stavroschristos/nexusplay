@@ -1,0 +1,114 @@
+{
+  "name": "AdminSettings",
+  "type": "object",
+  "properties": {
+    "platform_name": {
+      "type": "string",
+      "default": "NexusPlay",
+      "description": "Display name of the platform"
+    },
+    "platform_tagline": {
+      "type": "string",
+      "description": "Short marketing tagline"
+    },
+    "default_user_role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin"
+      ],
+      "default": "user",
+      "description": "Role assigned to new users"
+    },
+    "allow_public_signups": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether new users can self-register"
+    },
+    "feature_communities": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable the communities feature"
+    },
+    "feature_messaging": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable messaging"
+    },
+    "feature_lfg": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable LFG"
+    },
+    "feature_challenges": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable challenges"
+    },
+    "feature_radar": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable the Gaming Radar"
+    },
+    "feature_assistant": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable the AI assistant"
+    },
+    "feature_wrapped": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable Gaming Wrapped"
+    },
+    "feature_streams": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable/disable live streams"
+    },
+    "announcement_title": {
+      "type": "string",
+      "description": "Active banner announcement title"
+    },
+    "announcement_body": {
+      "type": "string",
+      "description": "Active banner announcement body"
+    },
+    "announcement_type": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "update",
+        "maintenance"
+      ],
+      "default": "info",
+      "description": "Announcement style"
+    },
+    "announcement_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the announcement banner is shown"
+    },
+    "community_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Platform-wide community rules"
+    },
+    "max_collection_size": {
+      "type": "number",
+      "default": 100,
+      "description": "Max games per collection"
+    },
+    "rate_limit_messages_per_min": {
+      "type": "number",
+      "default": 30,
+      "description": "Messages a user can send per minute"
+    }
+  },
+  "required": [
+    "platform_name"
+  ]
+}
