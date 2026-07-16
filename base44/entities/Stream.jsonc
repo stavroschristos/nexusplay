@@ -1,0 +1,36 @@
+{
+  "name": "Stream",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Stream title"
+    },
+    "game": {
+      "type": "string",
+      "description": "Game being streamed"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Streaming platform (Twitch, YouTube, etc.)"
+    },
+    "is_live": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether stream is currently live"
+    },
+    "viewers": {
+      "type": "number",
+      "default": 0,
+      "description": "Current viewer count"
+    },
+    "streamer_name": {
+      "type": "string",
+      "description": "Display name (denormalized)"
+    }
+  },
+  "required": [
+    "title",
+    "game"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "Challenge",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Challenge title"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the challenge involves"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "weekly",
+        "monthly",
+        "community",
+        "special"
+      ],
+      "default": "weekly",
+      "description": "Challenge cadence"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "indie",
+        "achievement",
+        "completion",
+        "genre",
+        "social",
+        "difficulty"
+      ],
+      "description": "Challenge type"
+    },
+    "target": {
+      "type": "number",
+      "default": 1,
+      "description": "Goal count to complete"
+    },
+    "xp_reward": {
+      "type": "number",
+      "default": 100,
+      "description": "XP awarded on completion"
+    },
+    "badge_icon": {
+      "type": "string",
+      "description": "Emoji or icon for the badge"
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the challenge expires"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "type"
+  ]
+}

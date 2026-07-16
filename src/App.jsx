@@ -21,6 +21,10 @@ import CollectionDetail from '@/pages/CollectionDetail';
 import LFG from '@/pages/LFG';
 import Notifications from '@/pages/Notifications';
 import Wrapped from '@/pages/Wrapped';
+import Radar from '@/pages/Radar';
+import Challenges from '@/pages/Challenges';
+import Assistant from '@/pages/Assistant';
+import Onboarding from '@/pages/Onboarding';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -74,6 +78,10 @@ const AuthenticatedApp = () => {
           <Route path="/lfg" element={<LFG />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/wrapped" element={<Wrapped />} />
+          <Route path="/radar" element={<Radar />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/assistant" element={<Assistant />} />
+          <Route path="/onboarding" element={<Onboarding />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

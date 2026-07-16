@@ -13,7 +13,8 @@ import GamingTimeline from '@/components/profile/GamingTimeline';
 import PersonalityBadge from '@/components/shared/PersonalityBadge';
 import CompatibilityScore, { calculateCompatibility } from '@/components/shared/CompatibilityScore';
 import CollectionCard from '@/components/shared/CollectionCard';
-import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap } from 'lucide-react';
+import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap, Clock, Share2 } from 'lucide-react';
+import ShareCard from '@/components/share/ShareCard';
 
 export default function Profile() {
   const { id } = useParams();
@@ -28,6 +29,7 @@ export default function Profile() {
   const [collections, setCollections] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [milestones, setMilestones] = useState([]);
+  const [memories, setMemories] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
@@ -46,9 +48,10 @@ export default function Profile() {
       base44.entities.Collection.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.GameReview.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.Timeline.filter({ created_by_id: profileId }, '-year', 50),
+      base44.entities.Memory.filter({ created_by_id: profileId }, '-memory_date', 50),
       base44.entities.Follow.filter({ following_id: profileId }),
       base44.entities.Follow.filter({ follower_id: profileId }),
-    ]).then(([users, userPosts, userAccounts, userAch, userCols, userReviews, userMilestones, followersList, followingList]) => {
+    ]).then(([users, userPosts, userAccounts, userAch, userCols, userReviews, userMilestones, userMemories, followersList, followingList]) => {
       const u = users.find((x) => x.id === profileId) || (profileId === currentUser?.id ? currentUser : null);
       setProfileUser(u);
       setPosts(userPosts);
@@ -57,6 +60,7 @@ export default function Profile() {
       setCollections(userCols);
       setReviews(userReviews);
       setMilestones(userMilestones);
+      setMemories(userMemories);
       setFollowers(followersList.length);
       setFollowing(followingList.length);
       setIsFollowing(followersList.some((f) => f.follower_id === currentUser?.id));
@@ -111,6 +115,7 @@ export default function Profile() {
     { key: 'collections', label: 'Collections', icon: Layers, count: collections.length },
     { key: 'reviews', label: 'Reviews', icon: Star, count: reviews.length },
     { key: 'timeline', label: 'Timeline', icon: Trophy, count: milestones.length },
+    { key: 'memories', label: 'Memories', icon: Clock, count: memories.length },
     { key: 'stats', label: 'Stats', icon: Zap, count: null },
   ];
 
@@ -128,9 +133,14 @@ export default function Profile() {
             <AvatarFallback className="bg-primary/30 text-primary text-3xl font-bold">{initials}</AvatarFallback>
           </Avatar>
           {isOwn ? (
-            <Button asChild variant="outline" size="sm" className="rounded-full mb-2">
-              <Link to="/settings">Edit Profile</Link>
-            </Button>
+            <div className="flex gap-2 mb-2">
+              <Button asChild variant="outline" size="sm" className="rounded-full">
+                <Link to="/settings">Edit Profile</Link>
+              </Button>
+              <Button asChild size="sm" className="rounded-full">
+                <Link to="/wrapped"><Share2 className="w-4 h-4" /> Share Card</Link>
+              </Button>
+            </div>
           ) : (
             <div className="flex gap-2 mb-2">
               <Button onClick={toggleFollow} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="rounded-full">
@@ -234,6 +244,24 @@ export default function Profile() {
           )
         )}
         {tab === 'timeline' && <GamingTimeline milestones={milestones} />}
+        {tab === 'memories' && (
+          memories.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No memories yet. Your gaming history will appear here automatically.</p> : (
+            <div className="space-y-3">
+              {memories.map((m) => (
+                <div key={m.id} className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-4 flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Clock className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{new Date(m.memory_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <h4 className="font-semibold text-sm mt-0.5">{m.title}</h4>
+                    {m.description && <p className="text-sm text-muted-foreground mt-1">{m.description}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        )}
       </div>
 
       {/* Game accounts */}

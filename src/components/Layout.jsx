@@ -3,14 +3,17 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { base44 } from '@/api/base44Client';
-import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell } from 'lucide-react';
+import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { icon: Home, label: 'Feed', path: '/' },
+  { icon: Home, label: 'Home', path: '/' },
+  { icon: Radio, label: 'Gaming Radar', path: '/radar' },
   { icon: Compass, label: 'Discover', path: '/explore' },
   { icon: Users, label: 'Communities', path: '/communities' },
   { icon: Gamepad, label: 'Games', path: '/games' },
+  { icon: Target, label: 'Challenges', path: '/challenges' },
+  { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
   { icon: MessagesSquare, label: 'Messages', path: '/messages' },
   { icon: Flame, label: 'Wrapped', path: '/wrapped' },
   { icon: Trophy, label: 'My Profile', path: '/profile' },
@@ -18,9 +21,9 @@ const navItems = [
 ];
 
 const mobileNavItems = [
-  { icon: Home, label: 'Feed', path: '/' },
-  { icon: Compass, label: 'Discover', path: '/explore' },
-  { icon: Users, label: 'Communities', path: '/communities' },
+  { icon: Home, label: 'Home', path: '/' },
+  { icon: Radio, label: 'Radar', path: '/radar' },
+  { icon: Target, label: 'Challenges', path: '/challenges' },
   { icon: Trophy, label: 'Profile', path: '/profile' },
   { icon: Bell, label: 'Alerts', path: '/notifications' },
 ];

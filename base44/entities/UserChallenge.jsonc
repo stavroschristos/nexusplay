@@ -1,0 +1,28 @@
+{
+  "name": "UserChallenge",
+  "type": "object",
+  "properties": {
+    "challenge_id": {
+      "type": "string",
+      "description": "The challenge being tracked"
+    },
+    "progress": {
+      "type": "number",
+      "default": 0,
+      "description": "Current progress toward target"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the challenge is done"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When completed"
+    }
+  },
+  "required": [
+    "challenge_id"
+  ]
+}

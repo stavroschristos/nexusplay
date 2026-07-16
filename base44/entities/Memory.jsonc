@@ -1,0 +1,42 @@
+{
+  "name": "Memory",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Memory title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Memory details"
+    },
+    "memory_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the event happened"
+    },
+    "icon": {
+      "type": "string",
+      "enum": [
+        "trophy",
+        "game",
+        "rank",
+        "hours",
+        "complete",
+        "start",
+        "friend"
+      ],
+      "default": "game",
+      "description": "Memory icon"
+    },
+    "is_auto": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this was auto-generated"
+    }
+  },
+  "required": [
+    "title",
+    "memory_date"
+  ]
+}

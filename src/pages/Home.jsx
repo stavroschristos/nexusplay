@@ -5,7 +5,8 @@ import { base44 } from '@/api/base44Client';
 import PostComposer from '@/components/feed/PostComposer';
 import PostCard from '@/components/feed/PostCard';
 import GameCard from '@/components/shared/GameCard';
-import { Loader2, Sparkles, TrendingUp, Flame, Users } from 'lucide-react';
+import HomeDashboard from '@/components/home/HomeDashboard';
+import { Loader2, Sparkles, TrendingUp, Flame, Users, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
   const [authors, setAuthors] = useState({});
   const [loading, setLoading] = useState(true);
   const [feedFilter, setFeedFilter] = useState('all');
+  const [view, setView] = useState('dashboard');
   const [trendingGames, setTrendingGames] = useState([]);
 
   const loadPosts = useCallback(async () => {
@@ -59,6 +61,19 @@ export default function Home() {
         </div>
 
         <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
+          <button onClick={() => setView('dashboard')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5', view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
+            <LayoutDashboard className="w-4 h-4" /> Dashboard
+          </button>
+          <button onClick={() => setView('feed')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all', view === 'feed' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
+            Feed
+          </button>
+        </div>
+
+        {view === 'dashboard' ? (
+          <HomeDashboard />
+        ) : (
+          <>
+        <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
           {[
             { key: 'all', label: 'All' },
             { key: 'activities', label: 'Activity' },
@@ -96,6 +111,8 @@ export default function Home() {
               <PostCard key={post.id} post={post} author={authors[post.created_by_id]} onDeleted={handleDeleted} />
             ))}
           </div>
+        )}
+          </>
         )}
       </div>
 
