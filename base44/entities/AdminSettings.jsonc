@@ -25,6 +25,16 @@
       "default": true,
       "description": "Whether new users can self-register"
     },
+    "registration_mode": {
+      "type": "string",
+      "enum": [
+        "public",
+        "invite_only",
+        "waitlist"
+      ],
+      "default": "public",
+      "description": "How new users can join: public, invite_only, or waitlist"
+    },
     "feature_communities": {
       "type": "boolean",
       "default": true,
@@ -110,5 +120,22 @@
   },
   "required": [
     "platform_name"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

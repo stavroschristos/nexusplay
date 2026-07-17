@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import AuthLayout from "@/components/AuthLayout";
 import OAuthButtons from "@/components/auth/OAuthButtons";
 import { toast } from "@/components/ui/use-toast";
+import { getRegistrationMode } from "@/lib/registration";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -18,6 +19,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [regMode, setRegMode] = useState("public");
+
+  useEffect(() => { getRegistrationMode().then(setRegMode); }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,6 +69,39 @@ export default function Register() {
       setError(err.message || "Failed to resend code");
     }
   };
+
+  // Invite-only / waitlist gating only applies before the OTP step.
+  if (!showOtp && regMode === "waitlist") {
+    return (
+      <AuthLayout
+        icon={UserPlus}
+        title="Join the waitlist"
+        subtitle="Registration is currently by approval"
+        footer={<Link to="/waitlist" className="text-primary font-medium hover:underline">Go to the waitlist form →</Link>}
+      >
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground mb-5">We're rolling out access in waves. Join the waitlist and we'll email you when your spot opens up.</p>
+          <Button asChild className="w-full h-12 rounded-full glow"><Link to="/waitlist">Reserve my spot</Link></Button>
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (!showOtp && regMode === "invite_only") {
+    return (
+      <AuthLayout
+        icon={UserPlus}
+        title="Invite only"
+        subtitle="Registration is currently closed"
+        footer={<Link to="/" className="text-primary font-medium hover:underline">Back to home</Link>}
+      >
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground mb-5">NexusPlay is invite-only right now. New accounts require an invitation from an existing admin.</p>
+          <Button asChild variant="outline" className="w-full h-12 rounded-full"><Link to="/login">I have an account</Link></Button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (showOtp) {
     return (

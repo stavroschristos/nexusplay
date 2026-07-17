@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { LayoutDashboard, Gamepad2, Flag, BarChart3, Settings as SettingsIcon, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Gamepad2, Flag, BarChart3, Settings as SettingsIcon, ShieldAlert, UserCheck } from 'lucide-react';
 import AdminOverview from '@/components/admin/AdminOverview';
 import AdminGaming from '@/components/admin/AdminGaming';
 import AdminModeration from '@/components/admin/AdminModeration';
 import AdminFeatures from '@/components/admin/AdminFeatures';
 import AdminSettings from '@/components/admin/AdminSettings';
+import AdminRegistration from '@/components/admin/AdminRegistration';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
   { key: 'gaming', label: 'Gaming', icon: Gamepad2 },
   { key: 'moderation', label: 'Moderation', icon: Flag },
+  { key: 'registration', label: 'Registration', icon: UserCheck },
   { key: 'features', label: 'Features', icon: BarChart3 },
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
@@ -66,6 +68,7 @@ export default function Admin() {
       {tab === 'gaming' && <AdminGaming />}
       {tab === 'moderation' && <AdminModeration />}
       {tab === 'features' && <AdminFeatures />}
+      {tab === 'registration' && <AdminRegistration />}
       {tab === 'settings' && <AdminSettings />}
     </div>
   );

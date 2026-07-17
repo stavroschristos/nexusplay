@@ -1,0 +1,66 @@
+{
+  "name": "WaitlistEntry",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Submitter name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Submitter email"
+    },
+    "favorite_platform": {
+      "type": "string",
+      "enum": [
+        "PlayStation",
+        "Xbox",
+        "Steam",
+        "Nintendo",
+        "Epic Games",
+        "Battle.net",
+        "Riot",
+        "Twitch",
+        "PC",
+        "Mobile"
+      ],
+      "description": "Preferred gaming platform"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Review status"
+    },
+    "note": {
+      "type": "string",
+      "description": "Admin note"
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

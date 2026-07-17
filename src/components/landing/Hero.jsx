@@ -4,7 +4,7 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimatedBackground from './AnimatedBackground';
 
-export default function Hero() {
+export default function Hero({ primaryHref = '/register', primaryLabel = 'Create Free Account' }) {
   return (
     <section className="relative min-h-[100svh] flex items-center justify-center px-4 pt-24 pb-16 overflow-hidden">
       <AnimatedBackground />
@@ -27,7 +27,7 @@ export default function Hero() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
           className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button asChild size="lg" className="rounded-full h-12 px-8 text-base glow w-full sm:w-auto">
-            <Link to="/register">Create Free Account</Link>
+            <Link to={primaryHref}>{primaryLabel}</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="rounded-full h-12 px-8 text-base w-full sm:w-auto">
             <Link to="/login">Sign In</Link>
