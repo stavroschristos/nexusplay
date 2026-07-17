@@ -1,4 +1,7 @@
 import { cn } from '@/lib/utils';
+import { calculateCompatibility, getCompatibilityBreakdown } from '@/lib/compatibility';
+
+export { calculateCompatibility, getCompatibilityBreakdown };
 
 export default function CompatibilityScore({ score, size = 'md' }) {
   const sizes = { sm: 'w-12 h-12', md: 'w-20 h-20', lg: 'w-28 h-28' };
@@ -24,26 +27,4 @@ export default function CompatibilityScore({ score, size = 'md' }) {
       </div>
     </div>
   );
-}
-
-export function calculateCompatibility(userA, userB) {
-  if (!userA || !userB) return 0;
-  let score = 50;
-  const gamesA = new Set(userA.favorite_games || []);
-  const gamesB = new Set(userB.favorite_games || []);
-  const sharedGames = [...gamesA].filter((g) => gamesB.has(g)).length;
-  score += sharedGames * 8;
-  const genresA = new Set(userA.favorite_genres || []);
-  const genresB = new Set(userB.favorite_genres || []);
-  const sharedGenres = [...genresA].filter((g) => genresB.has(g)).length;
-  score += sharedGenres * 5;
-  const franchisesA = new Set(userA.favorite_franchises || []);
-  const franchisesB = new Set(userB.favorite_franchises || []);
-  const sharedFranchises = [...franchisesA].filter((f) => franchisesB.has(f)).length;
-  score += sharedFranchises * 4;
-  const platformsA = new Set(userA.platforms_owned || []);
-  const platformsB = new Set(userB.platforms_owned || []);
-  const sharedPlatforms = [...platformsA].filter((p) => platformsB.has(p)).length;
-  score += sharedPlatforms * 2;
-  return Math.min(99, score);
 }

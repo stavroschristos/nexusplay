@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -6,16 +6,42 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlatformIcon } from '@/components/profile/GameAccountBadge';
-import PersonalityBadge from '@/components/shared/PersonalityBadge';
-import CompatibilityScore, { calculateCompatibility } from '@/components/shared/CompatibilityScore';
-import { Loader2, Search, Users, UserPlus, UserCheck, TrendingUp, Trophy, Sparkles, Medal } from 'lucide-react';
+import GamerCard from '@/components/explore/GamerCard';
+import CommunityCard from '@/components/explore/CommunityCard';
+import TrendingGameCard from '@/components/explore/TrendingGameCard';
+import {
+  getCompatibilityBreakdown,
+  sharedGamesCount,
+  sharedHabitsCount,
+  achievementSimilarity,
+} from '@/lib/compatibility';
+import {
+  Loader2, Search, Users, UserPlus, UserCheck, Sparkles, TrendingUp, Trophy,
+  Gamepad2, Flame, Crown, Medal, Heart, Layers,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const TABS = [
+  { key: 'recommended', label: 'For You', icon: Sparkles },
+  { key: 'shared', label: 'Shared Libraries', icon: Gamepad2 },
+  { key: 'habits', label: 'Similar Habits', icon: Layers },
+  { key: 'achievers', label: 'Achievement Twins', icon: Trophy },
+  { key: 'trending', label: 'Trending Gamers', icon: TrendingUp },
+  { key: 'creators', label: 'Rising Creators', icon: Heart },
+  { key: 'communities', label: 'Communities', icon: Users },
+  { key: 'games', label: 'Trending Games', icon: Flame },
+  { key: 'recent', label: 'New Gamers', icon: Medal },
+];
 
 export default function Explore() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [accountsMap, setAccountsMap] = useState({});
   const [followingIds, setFollowingIds] = useState(new Set());
+  const [communities, setCommunities] = useState([]);
+  const [games, setGames] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
+  const [creatorStats, setCreatorStats] = useState({});
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('recommended');
@@ -25,7 +51,11 @@ export default function Explore() {
       base44.entities.User.list(),
       base44.entities.GameAccount.list('-created_date', 200),
       base44.entities.Follow.filter({ follower_id: currentUser?.id }),
-    ]).then(([allUsers, allAccounts, follows]) => {
+      base44.entities.Community.list('-members_count', 50),
+      base44.entities.Game.list('-created_date', 100),
+      base44.entities.GameReview.list('-created_date', 200),
+      base44.entities.Post.list('-created_date', 200),
+    ]).then(([allUsers, allAccounts, follows, comms, allGames, reviews, posts]) => {
       setUsers(allUsers.filter((u) => u.id !== currentUser?.id));
       const accMap = {};
       allAccounts.forEach((a) => {
@@ -34,6 +64,29 @@ export default function Explore() {
       });
       setAccountsMap(accMap);
       setFollowingIds(new Set(follows.map((f) => f.following_id)));
+      setCommunities(comms || []);
+      setGames(allGames || []);
+
+      // Aggregate review stats per game
+      const rStats = {};
+      (reviews || []).forEach((r) => {
+        const gid = r.game_id;
+        if (!rStats[gid]) rStats[gid] = { count: 0, totalRating: 0 };
+        rStats[gid].count++;
+        rStats[gid].totalRating += r.rating || 0;
+      });
+      setReviewStats(rStats);
+
+      // Aggregate creator engagement per user
+      const cStats = {};
+      (posts || []).forEach((p) => {
+        const uid = p.created_by_id;
+        if (!cStats[uid]) cStats[uid] = { likes: 0, comments: 0, posts: 0 };
+        cStats[uid].likes += p.likes_count || 0;
+        cStats[uid].comments += p.comments_count || 0;
+        cStats[uid].posts++;
+      });
+      setCreatorStats(cStats);
     }).finally(() => setLoading(false));
   }, [currentUser?.id]);
 
@@ -47,74 +100,68 @@ export default function Explore() {
       await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: userId });
       newSet.add(userId);
       await base44.entities.Notification.create({
-        type: 'follow', content: `${currentUser?.display_name || 'Someone'} started following you`, link: `/profile/${currentUser?.id}`,
-        actor_id: currentUser?.id, actor_name: currentUser?.display_name || currentUser?.full_name,
+        type: 'follow',
+        content: `${currentUser?.display_name || 'Someone'} started following you`,
+        link: `/profile/${currentUser?.id}`,
+        actor_id: currentUser?.id,
+        actor_name: currentUser?.display_name || currentUser?.full_name,
       });
     }
     setFollowingIds(newSet);
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
-
-  const withCompat = users.map((u) => ({ user: u, compat: calculateCompatibility(currentUser, u) }));
-  const recommended = [...withCompat].sort((a, b) => b.compat - a.compat).slice(0, 12);
-  const trending = [...withCompat].sort((a, b) => (b.user.achievement_score || 0) - (a.user.achievement_score || 0)).slice(0, 12);
-  const leaderboard = [...users].sort((a, b) => (b.achievement_score || 0) - (a.user?.achievement_score || 0)).slice(0, 20);
-  const recentlyJoined = [...users].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 12);
+  // Compute breakdowns for all users
+  const userData = useMemo(() => {
+    return users.map((u) => {
+      const breakdown = getCompatibilityBreakdown(currentUser, u);
+      return {
+        user: u,
+        breakdown,
+        sharedGames: sharedGamesCount(currentUser, u),
+        sharedHabits: sharedHabitsCount(currentUser, u),
+        achSimilarity: achievementSimilarity(currentUser, u),
+      };
+    });
+  }, [users, currentUser]);
 
   const filtered = (list) => list.filter(({ user: u }) => {
+    if (!search) return true;
     const name = (u.display_name || u.full_name || u.email || '').toLowerCase();
     return name.includes(search.toLowerCase());
   });
 
-  const renderUserRow = ({ user: u, compat }) => {
-    const initials = (u.display_name || u.full_name || u.email || 'G').charAt(0).toUpperCase();
-    const accs = accountsMap[u.id] || [];
-    const isFollowing = followingIds.has(u.id);
-    return (
-      <div key={u.id} className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm">
-        <Link to={`/profile/${u.id}`}>
-          <Avatar className="w-12 h-12 ring-2 ring-primary/20">
-            <AvatarImage src={u.avatar_url} />
-            <AvatarFallback className="bg-primary/20 text-primary">{initials}</AvatarFallback>
-          </Avatar>
-        </Link>
-        <Link to={`/profile/${u.id}`} className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-sm truncate">{u.display_name || u.full_name || 'Gamer'}</p>
-            <PersonalityBadge personality={u.gaming_personality} className="!py-0.5 !text-xs" />
-          </div>
-          {u.bio && <p className="text-xs text-muted-foreground truncate mt-0.5">{u.bio}</p>}
-          {accs.length > 0 && (
-            <div className="flex items-center gap-2 mt-1">
-              {accs.slice(0, 4).map((a) => <PlatformIcon key={a.id} platform={a.platform} className="w-3.5 h-3.5" />)}
-              {u.achievement_score > 0 && <span className="text-xs text-amber-400 font-medium">🏆 {u.achievement_score}</span>}
-            </div>
-          )}
-        </Link>
-        {compat > 0 && <CompatibilityScore score={compat} size="sm" />}
-        <Button onClick={() => toggleFollow(u.id)} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="rounded-full shrink-0">
-          {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-          <span className="hidden sm:inline ml-1">{isFollowing ? 'Following' : 'Follow'}</span>
-        </Button>
-      </div>
-    );
-  };
+  const recommended = [...userData].sort((a, b) => b.breakdown.score - a.breakdown.score).slice(0, 20);
+  const sharedLib = [...userData].filter((d) => d.sharedGames > 0).sort((a, b) => b.sharedGames - a.sharedGames || b.breakdown.score - a.breakdown.score).slice(0, 20);
+  const habits = [...userData].filter((d) => d.sharedHabits > 0).sort((a, b) => b.sharedHabits - a.sharedHabits || b.breakdown.score - a.breakdown.score).slice(0, 20);
+  const achievers = [...userData].sort((a, b) => b.achSimilarity - a.achSimilarity || b.breakdown.score - a.breakdown.score).slice(0, 20);
+  const trending = [...userData].sort((a, b) => (b.user.achievement_score || 0) - (a.user.achievement_score || 0)).slice(0, 20);
+  const risingCreators = [...userData].filter((d) => creatorStats[d.user.id]?.posts > 0).sort((a, b) => {
+    const sa = creatorStats[a.user.id] || { likes: 0, comments: 0 };
+    const sb = creatorStats[b.user.id] || { likes: 0, comments: 0 };
+    return (sb.likes + sb.comments) - (sa.likes + sa.comments);
+  }).slice(0, 20);
+  const recentlyJoined = [...userData].sort((a, b) => new Date(b.user.created_date) - new Date(a.user.created_date)).slice(0, 20);
 
-  const tabs = [
-    { key: 'recommended', label: 'Recommended', icon: Sparkles, list: filtered(recommended) },
-    { key: 'trending', label: 'Trending', icon: TrendingUp, list: filtered(trending) },
-    { key: 'leaderboard', label: 'Leaderboard', icon: Trophy, list: filtered(leaderboard.map((u) => ({ user: u, compat: 0 }))) },
-    { key: 'recent', label: 'Recently Joined', icon: Users, list: filtered(recentlyJoined.map((u) => ({ user: u, compat: 0 }))) },
-  ];
+  const trendingGames = useMemo(() => {
+    return (games || []).map((g) => {
+      const stats = reviewStats[g.id] || { count: 0, totalRating: 0 };
+      const avgRating = stats.count > 0 ? stats.totalRating / stats.count : 0;
+      return { game: g, reviewCount: stats.count, avgRating };
+    }).sort((a, b) => (b.reviewCount + b.avgRating) - (a.reviewCount + a.avgRating)).slice(0, 12);
+  }, [games, reviewStats]);
 
-  const activeTab = tabs.find((t) => t.key === tab);
+  const popularCommunities = [...(communities || [])].sort((a, b) => (b.members_count || 0) - (a.members_count || 0)).slice(0, 12);
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
       <div className="flex items-center gap-2 mb-6">
-        <Users className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold font-heading">Discover Gamers</h1>
+        <Sparkles className="w-6 h-6 text-primary" />
+        <div>
+          <h1 className="text-2xl font-bold font-heading">Discover Your People</h1>
+          <p className="text-xs text-muted-foreground">Find gamers who match your style, library, and vibe</p>
+        </div>
       </div>
 
       <div className="relative mb-4">
@@ -122,13 +169,13 @@ export default function Explore() {
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search gamers..." className="pl-10 rounded-full bg-card/50" />
       </div>
 
-      <div className="flex gap-1 mb-6 overflow-x-auto scrollbar-thin pb-1">
-        {tabs.map((t) => (
+      <div className="flex gap-1.5 mb-6 overflow-x-auto scrollbar-thin pb-1">
+        {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+              'flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
               tab === t.key ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
             )}
           >
@@ -137,37 +184,236 @@ export default function Explore() {
         ))}
       </div>
 
-      {tab === 'leaderboard' ? (
-        <div className="space-y-2">
-          {activeTab.list.map(({ user: u }, idx) => {
-            const initials = (u.display_name || u.full_name || u.email || 'G').charAt(0).toUpperCase();
-            const medalColor = idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-muted-foreground';
-            return (
-              <Link key={u.id} to={`/profile/${u.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card/50 hover:ring-1 hover:ring-primary/30 transition-all">
-                <span className={cn('w-8 text-center font-bold flex items-center justify-center', medalColor)}>
-                  {idx < 3 ? <Medal className="w-5 h-5 mx-auto" /> : idx + 1}
-                </span>
-                <Avatar className="w-10 h-10 ring-2 ring-primary/20">
-                  <AvatarImage src={u.avatar_url} />
-                  <AvatarFallback className="bg-primary/20 text-primary">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{u.display_name || u.full_name || 'Gamer'}</p>
-                  {u.gaming_personality && <p className="text-xs text-muted-foreground truncate">{u.gaming_personality}</p>}
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-amber-400">{u.achievement_score || 0}</p>
-                  <p className="text-xs text-muted-foreground">score</p>
-                </div>
-              </Link>
-            );
-          })}
+      <TabContent
+        tab={tab}
+        recommended={filtered(recommended)}
+        sharedLib={filtered(sharedLib)}
+        habits={filtered(habits)}
+        achievers={filtered(achievers)}
+        trending={filtered(trending)}
+        risingCreators={filtered(risingCreators)}
+        recentlyJoined={filtered(recentlyJoined)}
+        popularCommunities={popularCommunities}
+        trendingGames={trendingGames}
+        accountsMap={accountsMap}
+        followingIds={followingIds}
+        onToggleFollow={toggleFollow}
+        creatorStats={creatorStats}
+      />
+    </div>
+  );
+}
+
+function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, risingCreators, recentlyJoined, popularCommunities, trendingGames, accountsMap, followingIds, onToggleFollow, creatorStats }) {
+  const renderGamerGrid = (list, showReasons = true) => {
+    if (list.length === 0) return <EmptyState text="No gamers found. Try updating your profile to get better matches!" />;
+    return (
+      <div className="grid sm:grid-cols-2 gap-3">
+        {list.map((d) => (
+          <GamerCard
+            key={d.user.id}
+            user={d.user}
+            accounts={accountsMap[d.user.id] || []}
+            breakdown={d.breakdown}
+            isFollowing={followingIds.has(d.user.id)}
+            onToggleFollow={onToggleFollow}
+            showReasons={showReasons}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  if (tab === 'recommended') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Sparkles} title="Recommended Gamers" subtitle="Highest compatibility matches for you" />
+        {renderGamerGrid(recommended)}
+      </div>
+    );
+  }
+
+  if (tab === 'shared') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Gamepad2} title="Shared Libraries" subtitle="Gamers who play the same games as you" />
+        {sharedLib.length === 0 ? <EmptyState text="No gamers share your favorite games yet. Add more in profile settings!" /> : renderGamerGrid(sharedLib)}
+      </div>
+    );
+  }
+
+  if (tab === 'habits') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Layers} title="Similar Gaming Habits" subtitle="Gamers who share your play style and habits" />
+        {habits.length === 0 ? <EmptyState text="No gamers share your gaming habits yet. Set your habits in profile settings!" /> : renderGamerGrid(habits)}
+      </div>
+    );
+  }
+
+  if (tab === 'achievers') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Trophy} title="Achievement Twins" subtitle="Gamers with similar trophy and completion patterns" />
+        {renderGamerGrid(achievers)}
+      </div>
+    );
+  }
+
+  if (tab === 'trending') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={TrendingUp} title="Trending Gamers" subtitle="Top gamers by achievement score" />
+        {trending.length === 0 ? <EmptyState text="No gamers found." /> : (
+          <div className="space-y-2">
+            {trending.map(({ user: u, breakdown }, idx) => (
+              <TrendingGamerRow key={u.id} user={u} breakdown={breakdown} rank={idx} accounts={accountsMap[u.id] || []} isFollowing={followingIds.has(u.id)} onToggleFollow={onToggleFollow} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === 'creators') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Heart} title="Rising Creators" subtitle="Gamers creating the most engaging content" />
+        {risingCreators.length === 0 ? (
+          <EmptyState text="No creators yet. Be the first to share posts and activities!" />
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {risingCreators.map((d) => {
+              const stats = creatorStats[d.user.id] || {};
+              return (
+                <CreatorCard
+                  key={d.user.id}
+                  user={d.user}
+                  accounts={accountsMap[d.user.id] || []}
+                  breakdown={d.breakdown}
+                  stats={stats}
+                  isFollowing={followingIds.has(d.user.id)}
+                  onToggleFollow={onToggleFollow}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === 'communities') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Users} title="Popular Communities" subtitle="Active communities you can join" />
+        {popularCommunities.length === 0 ? <EmptyState text="No communities yet." /> : (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {popularCommunities.map((c) => <CommunityCard key={c.id} community={c} />)}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === 'games') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Flame} title="Trending Games" subtitle="Most reviewed and talked-about games" />
+        {trendingGames.length === 0 ? <EmptyState text="No games in the database yet." /> : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {trendingGames.map(({ game, reviewCount, avgRating }) => (
+              <TrendingGameCard key={game.id} game={game} reviewCount={reviewCount} avgRating={avgRating} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === 'recent') {
+    return (
+      <div className="space-y-4">
+        <SectionHeader icon={Medal} title="Recently Joined" subtitle="Newest members of the community" />
+        {renderGamerGrid(recentlyJoined, false)}
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function SectionHeader({ icon: Icon, title, subtitle }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-primary" />
+      </div>
+      <div>
+        <h2 className="font-bold text-base">{title}</h2>
+        <p className="text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({ text }) {
+  return <p className="text-center text-muted-foreground py-8 text-sm">{text}</p>;
+}
+
+function TrendingGamerRow({ user, breakdown, rank, accounts, isFollowing, onToggleFollow }) {
+  const initials = (user.display_name || user.full_name || user.email || 'G').charAt(0).toUpperCase();
+  const medalColor = rank === 0 ? 'text-amber-400' : rank === 1 ? 'text-slate-300' : rank === 2 ? 'text-orange-400' : 'text-muted-foreground';
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card/50 hover:ring-1 hover:ring-primary/30 transition-all">
+      <Link to={`/profile/${user.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+        <span className={cn('w-8 text-center font-bold flex items-center justify-center', medalColor)}>
+          {rank < 3 ? <Crown className="w-5 h-5 mx-auto" /> : rank + 1}
+        </span>
+        <Avatar className="w-10 h-10 ring-2 ring-primary/20">
+          <AvatarImage src={user.avatar_url} />
+          <AvatarFallback className="bg-primary/20 text-primary">{initials}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate">{user.display_name || user.full_name || 'Gamer'}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {user.achievement_score > 0 && <span className="text-xs text-amber-400 font-medium">🏆 {user.achievement_score}</span>}
+            {accounts.slice(0, 3).map((a) => <PlatformIcon key={a.id} platform={a.platform} className="w-3.5 h-3.5" />)}
+          </div>
         </div>
-      ) : activeTab.list.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8 text-sm">No gamers found.</p>
-      ) : (
-        <div className="space-y-3">{activeTab.list.map(renderUserRow)}</div>
-      )}
+      </Link>
+      {breakdown?.score > 0 && <span className="text-xs text-muted-foreground shrink-0">{breakdown.score}% match</span>}
+      <Button onClick={() => onToggleFollow(user.id)} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="rounded-full shrink-0">
+        {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+      </Button>
+    </div>
+  );
+}
+
+function CreatorCard({ user, accounts, breakdown, stats, isFollowing, onToggleFollow }) {
+  const initials = (user.display_name || user.full_name || user.email || 'G').charAt(0).toUpperCase();
+  return (
+    <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-4 space-y-3">
+      <div className="flex items-start gap-3">
+        <Link to={`/profile/${user.id}`} className="shrink-0">
+          <Avatar className="w-14 h-14 ring-2 ring-primary/20">
+            <AvatarImage src={user.avatar_url} />
+            <AvatarFallback className="bg-primary/20 text-primary text-lg font-bold">{initials}</AvatarFallback>
+          </Avatar>
+        </Link>
+        <Link to={`/profile/${user.id}`} className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate">{user.display_name || user.full_name || 'Gamer'}</p>
+          {user.bio && <p className="text-xs text-muted-foreground truncate mt-0.5">{user.bio}</p>}
+        </Link>
+      </div>
+      <div className="flex items-center gap-4 text-xs">
+        <span className="text-muted-foreground"><span className="font-bold text-foreground">{stats.posts || 0}</span> posts</span>
+        <span className="text-muted-foreground"><span className="font-bold text-rose-400">{stats.likes || 0}</span> likes</span>
+        <span className="text-muted-foreground"><span className="font-bold text-blue-400">{stats.comments || 0}</span> comments</span>
+      </div>
+      <Button onClick={() => onToggleFollow(user.id)} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="w-full rounded-full">
+        {isFollowing ? <><UserCheck className="w-4 h-4" /> Following</> : <><UserPlus className="w-4 h-4" /> Follow</>}
+      </Button>
     </div>
   );
 }
