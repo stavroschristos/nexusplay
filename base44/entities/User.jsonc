@@ -17,6 +17,10 @@
       "type": "string",
       "description": "Gamer display name / handle"
     },
+    "gamer_tag": {
+      "type": "string",
+      "description": "Unique public gamer tag (never email)"
+    },
     "bio": {
       "type": "string",
       "description": "Short bio"
@@ -195,6 +199,116 @@
       "type": "string",
       "format": "date-time",
       "description": "Last activity timestamp (for DAU/MAU & retention)"
+    },
+    "privacy_profile": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can view this profile"
+    },
+    "privacy_activity": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see gaming activity"
+    },
+    "privacy_achievements": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see achievement history"
+    },
+    "privacy_trophies": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see the trophy showcase"
+    },
+    "privacy_library": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see the game library / favorites"
+    },
+    "privacy_stats": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see playtime statistics"
+    },
+    "privacy_friends": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see the friends list"
+    },
+    "privacy_communities": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see communities joined"
+    },
+    "privacy_current_game": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see current game status"
+    },
+    "privacy_streaming": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "private"
+      ],
+      "default": "public",
+      "description": "Who can see streaming status"
+    },
+    "dm_permission": {
+      "type": "string",
+      "enum": [
+        "everyone",
+        "friends",
+        "none"
+      ],
+      "default": "everyone",
+      "description": "Who can start a direct message with this user"
     }
   },
   "required": [

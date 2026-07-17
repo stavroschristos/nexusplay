@@ -3,7 +3,7 @@ import { Gamepad2 } from 'lucide-react';
 
 const cols = [
   { title: 'Platform', links: [['About', '#'], ['Careers', '#'], ['Blog', '#'], ['Contact', '#']] },
-  { title: 'Legal', links: [['Privacy Policy', '#'], ['Terms of Service', '#'], ['Community Guidelines', '#'], ['Cookie Policy', '#']] },
+  { title: 'Legal', links: [['Privacy Policy', '/privacy'], ['Terms of Service', '/terms'], ['Community Guidelines', '/guidelines'], ['Data Usage', '/data-usage']] },
   { title: 'Community', links: [['Communities', '#'], ['Games', '#'], ['Gaming Radar', '#'], ['Gaming Wrapped', '#']] },
 ];
 
@@ -30,7 +30,13 @@ export default function Footer() {
             <h4 className="text-sm font-semibold mb-3">{c.title}</h4>
             <ul className="space-y-2">
               {c.links.map(([label, href]) => (
-                <li key={label}><a href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</a></li>
+                <li key={label}>
+                  {href.startsWith('/') ? (
+                    <Link to={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</Link>
+                  ) : (
+                    <a href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</a>
+                  )}
+                </li>
               ))}
             </ul>
           </div>

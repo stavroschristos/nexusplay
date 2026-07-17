@@ -45,7 +45,7 @@ export default function ConversationList({ conversations, users, activeId, onSel
       {conversations.map((conv) => {
         const otherId = conv.participant_ids.find((id) => id !== user?.id);
         const other = users[otherId];
-        const initials = (other?.display_name || other?.full_name || other?.email || 'G').charAt(0).toUpperCase();
+        const initials = (other?.display_name || other?.full_name || 'G').charAt(0).toUpperCase();
 
         return (
           <button

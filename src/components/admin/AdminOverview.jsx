@@ -151,7 +151,7 @@ export default function AdminOverview() {
           <div className="space-y-2">
             {data.mostActive.map(({ id, count, user }) => (
               <div key={id} className="flex items-center justify-between text-sm py-1">
-                <span className="truncate">{user.display_name || user.full_name || user.email}</span>
+                <span className="truncate">{user.display_name || user.full_name || 'User'}</span>
                 <span className="text-muted-foreground text-xs">{count} events</span>
               </div>
             ))}

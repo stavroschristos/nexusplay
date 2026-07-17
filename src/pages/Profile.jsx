@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import PostCard from '@/components/feed/PostCard';
@@ -20,12 +21,14 @@ import FavoriteGamesShowcase from '@/components/profile/FavoriteGamesShowcase';
 import { getTheme } from '@/components/profile/themeConfig';
 import EmptyState from '@/components/shared/EmptyState';
 import { SkeletonCard } from '@/components/shared/Skeleton';
-import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap, Clock, Share2, ListOrdered, Monitor, Sparkles } from 'lucide-react';
+import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap, Clock, Share2, ListOrdered, Monitor, Sparkles, Ban, ShieldAlert, Lock } from 'lucide-react';
 import ShareCard from '@/components/share/ShareCard';
+import { canView, canMessage, displayName as publicName } from '@/lib/privacy';
 
 export default function Profile() {
   const { id } = useParams();
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const profileId = id || currentUser?.id;
 
@@ -43,6 +46,8 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
+  const [ownerFollowsViewer, setOwnerFollowsViewer] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('posts');
   const [startingChat, setStartingChat] = useState(false);
@@ -80,6 +85,10 @@ export default function Profile() {
       setFollowers(followersList.length);
       setFollowing(followingList.length);
       setIsFollowing(followersList.some((f) => f.follower_id === currentUser?.id));
+      setOwnerFollowsViewer(followingList.some((f) => f.following_id === currentUser?.id));
+      if (profileId !== currentUser?.id) {
+        base44.entities.Block.filter({ blocked_id: profileId }).then((b) => setIsBlocked(b.length > 0)).catch(() => {});
+      }
     }).finally(() => setLoading(false));
   }, [profileId, currentUser]);
 
@@ -99,6 +108,14 @@ export default function Profile() {
   };
 
   const startChat = async () => {
+    const viewer = { id: currentUser?.id, isFriend: isFollowing && ownerFollowsViewer, isAdmin: currentUser?.role === 'admin' };
+    if (isBlocked) { toast({ title: 'Unblock this gamer to message them', variant: 'destructive' }); return; }
+    const blockedByThem = await base44.entities.Block.filter({ created_by_id: profileId, blocked_id: currentUser?.id }).catch(() => []);
+    if (blockedByThem.length > 0) { toast({ title: 'You cannot message this gamer', variant: 'destructive' }); return; }
+    if (!canMessage(profileUser, viewer)) {
+      toast({ title: 'This gamer is not accepting messages right now', variant: 'destructive' });
+      return;
+    }
     setStartingChat(true);
     try {
       const [a, b] = [currentUser.id, profileId].sort();
@@ -108,6 +125,19 @@ export default function Profile() {
       if (!conv) conv = await base44.entities.Conversation.create({ participant_ids: [currentUser.id, profileId], key });
       navigate('/messages', { state: { conversationId: conv.id } });
     } catch { setStartingChat(false); }
+  };
+
+  const toggleBlock = async () => {
+    try {
+      if (isBlocked) {
+        const rec = await base44.entities.Block.filter({ blocked_id: profileId });
+        if (rec[0]) await base44.entities.Block.delete(rec[0].id);
+        setIsBlocked(false);
+      } else {
+        await base44.entities.Block.create({ blocked_id: profileId, blocked_name: profileUser?.display_name || profileUser?.full_name });
+        setIsBlocked(true);
+      }
+    } catch { /* ignore */ }
   };
 
   if (loading) {
@@ -137,23 +167,43 @@ export default function Profile() {
     return <EmptyState icon={Trophy} title="User not found" description="This profile doesn't exist or has been removed." action={<Link to="/" className="text-primary hover:underline text-sm">Back to feed</Link>} />;
   }
 
+  if (!profileVisible) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20 text-center animate-fade-in">
+        <div className="w-16 h-16 rounded-2xl bg-primary/15 grid place-items-center mx-auto mb-4">
+          <Lock className="w-8 h-8 text-primary" />
+        </div>
+        <h1 className="text-xl font-bold font-heading">This profile is private</h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">{publicName(profileUser)} has chosen to keep their gaming identity private. You can still follow them to connect.</p>
+        <div className="flex gap-2 justify-center mt-5">
+          <Button onClick={toggleFollow} variant={isFollowing ? 'secondary' : 'default'} className="rounded-full">
+            {isFollowing ? <><UserCheck className="w-4 h-4" /> Following</> : <><UserPlus className="w-4 h-4" /> Follow</>}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const isOwn = profileId === currentUser?.id;
-  const initials = (profileUser.display_name || profileUser.full_name || profileUser.email || 'G').charAt(0).toUpperCase();
+  const isFriend = isFollowing && ownerFollowsViewer;
+  const viewer = { id: currentUser?.id, isFriend, isAdmin: currentUser?.role === 'admin' };
+  const initials = (profileUser.display_name || profileUser.full_name || 'G').charAt(0).toUpperCase();
   const compatibility = isOwn ? 0 : calculateCompatibility(currentUser, profileUser);
   const theme = getTheme(profileUser.profile_theme);
+  const profileVisible = isOwn || viewer.isAdmin || canView(profileUser, 'privacy_profile', viewer);
 
   const tabs = [
-    { key: 'posts', label: 'Posts', icon: MessageSquare, count: posts.length },
-    { key: 'favorites', label: 'Favorites', icon: Star, count: profileUser.favorite_games?.length || 0 },
-    { key: 'showcase', label: 'Showcase', icon: Trophy, count: achievements.filter((a) => a.is_showcased || a.rarity === 'Legendary' || a.rarity === 'Epic').length },
-    { key: 'toplists', label: 'Top Lists', icon: ListOrdered, count: topLists.length },
-    { key: 'setup', label: 'Setup', icon: Monitor, count: setups.length },
-    { key: 'collections', label: 'Collections', icon: Layers, count: collections.length },
-    { key: 'reviews', label: 'Reviews', icon: Star, count: reviews.length },
-    { key: 'timeline', label: 'Timeline', icon: Trophy, count: milestones.length },
-    { key: 'memories', label: 'Memories', icon: Clock, count: memories.length },
-    { key: 'stats', label: 'Stats', icon: Zap, count: null },
-  ];
+    { key: 'posts', label: 'Posts', icon: MessageSquare, count: posts.length, gate: 'privacy_activity' },
+    { key: 'favorites', label: 'Favorites', icon: Star, count: profileUser.favorite_games?.length || 0, gate: 'privacy_library' },
+    { key: 'showcase', label: 'Showcase', icon: Trophy, count: achievements.filter((a) => a.is_showcased || a.rarity === 'Legendary' || a.rarity === 'Epic').length, gate: 'privacy_trophies' },
+    { key: 'toplists', label: 'Top Lists', icon: ListOrdered, count: topLists.length, gate: 'privacy_library' },
+    { key: 'setup', label: 'Setup', icon: Monitor, count: setups.length, gate: 'privacy_library' },
+    { key: 'collections', label: 'Collections', icon: Layers, count: collections.length, gate: 'privacy_library' },
+    { key: 'reviews', label: 'Reviews', icon: Star, count: reviews.length, gate: 'privacy_library' },
+    { key: 'timeline', label: 'Timeline', icon: Trophy, count: milestones.length, gate: 'privacy_activity' },
+    { key: 'memories', label: 'Memories', icon: Clock, count: memories.length, gate: 'privacy_activity' },
+    { key: 'stats', label: 'Stats', icon: Zap, count: null, gate: 'privacy_stats' },
+  ].filter((t) => isOwn || viewer.isAdmin || canView(profileUser, t.gate, viewer));
 
   return (
     <div className="max-w-3xl mx-auto pb-12 animate-fade-in">
@@ -194,6 +244,10 @@ export default function Profile() {
                 {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
                 Message
               </Button>
+              <Button onClick={toggleBlock} variant="outline" size="sm" className="rounded-full" title={isBlocked ? 'Unblock this user' : 'Block this user'}>
+                <Ban className="w-4 h-4" />
+                {isBlocked ? 'Unblock' : 'Block'}
+              </Button>
             </div>
           )}
         </div>
@@ -206,10 +260,15 @@ export default function Profile() {
             )}
             <PersonalityBadge personality={profileUser.gaming_personality} />
           </div>
-          <p className="text-sm text-muted-foreground">{profileUser.email}</p>
+          {/* Email is private account data — only visible to the account owner */}
+          {isOwn ? (
+            <p className="text-sm text-muted-foreground">{profileUser.email}</p>
+          ) : profileUser.gamer_tag ? (
+            <p className="text-sm text-muted-foreground">@{profileUser.gamer_tag}</p>
+          ) : null}
           {profileUser.bio && <p className="text-sm mt-2 text-foreground/80">{profileUser.bio}</p>}
 
-          {profileUser.current_game && (
+          {profileUser.current_game && canView(profileUser, 'privacy_current_game', viewer) && (
             <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-emerald-300">Now playing:</span>
@@ -219,8 +278,12 @@ export default function Profile() {
 
           <div className="flex gap-5 mt-3 text-sm">
             <span><strong>{posts.length}</strong> <span className="text-muted-foreground">Posts</span></span>
-            <span><strong>{followers}</strong> <span className="text-muted-foreground">Followers</span></span>
-            <span><strong>{following}</strong> <span className="text-muted-foreground">Following</span></span>
+            {canView(profileUser, 'privacy_friends', viewer) && (
+              <>
+                <span><strong>{followers}</strong> <span className="text-muted-foreground">Followers</span></span>
+                <span><strong>{following}</strong> <span className="text-muted-foreground">Following</span></span>
+              </>
+            )}
             {!isOwn && compatibility > 0 && (
               <span className="flex items-center gap-1.5">
                 <CompatibilityScore score={compatibility} size="sm" />
@@ -325,7 +388,7 @@ export default function Profile() {
       </div>
 
       {/* Game accounts */}
-      {accounts.length > 0 && (
+      {accounts.length > 0 && canView(profileUser, 'privacy_library', viewer) && (
         <div className="px-4 pb-6">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
             <Gamepad2 className="w-4 h-4" /> Connected Accounts

@@ -1,0 +1,69 @@
+{
+  "name": "AdminAuditLog",
+  "type": "object",
+  "properties": {
+    "admin_name": {
+      "type": "string",
+      "description": "Display name of the admin who performed the action (denormalized)"
+    },
+    "action": {
+      "type": "string",
+      "description": "Short action code (e.g. feedback_update, user_suspend, feature_status_change)"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "post",
+        "comment",
+        "community",
+        "message",
+        "report",
+        "feedback",
+        "feature_request",
+        "waitlist",
+        "settings",
+        "other"
+      ],
+      "default": "other",
+      "description": "What kind of record was acted on"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID of the affected record"
+    },
+    "target_label": {
+      "type": "string",
+      "description": "Human-readable label of the affected record (denormalized)"
+    },
+    "details": {
+      "type": "string",
+      "description": "Free-text summary of what changed"
+    }
+  },
+  "required": [
+    "action"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

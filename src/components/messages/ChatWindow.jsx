@@ -2,15 +2,18 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, Ban, Flag, MoreVertical } from 'lucide-react';
 
 export default function ChatWindow({ conversation, otherUser, onBack }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export default function ChatWindow({ conversation, otherUser, onBack }) {
     );
   }
 
-  const initials = (otherUser?.display_name || otherUser?.full_name || otherUser?.email || 'G').charAt(0).toUpperCase();
+  const initials = (otherUser?.display_name || otherUser?.full_name || 'G').charAt(0).toUpperCase();
 
   return (
     <div className="flex flex-col h-full">
@@ -84,9 +87,33 @@ export default function ChatWindow({ conversation, otherUser, onBack }) {
             <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
           </Avatar>
         </Link>
-        <Link to={`/profile/${otherUser?.id}`} className="hover:underline">
-          <p className="font-semibold text-sm">{otherUser?.display_name || otherUser?.full_name || 'Gamer'}</p>
+        <Link to={`/profile/${otherUser?.id}`} className="hover:underline min-w-0">
+          <p className="font-semibold text-sm truncate">{otherUser?.display_name || otherUser?.full_name || 'Gamer'}</p>
         </Link>
+        <div className="ml-auto relative">
+          <button onClick={() => setMenuOpen((o) => !o)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50" aria-label="Conversation options"><MoreVertical className="w-4 h-4" /></button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl border border-border bg-popover shadow-xl py-1 animate-scale-in" onMouseLeave={() => setMenuOpen(false)}>
+              <button
+                onClick={async () => {
+                  const existing = await base44.entities.Block.filter({ blocked_id: otherUser?.id });
+                  if (existing[0]) { await base44.entities.Block.delete(existing[0].id); toast({ title: 'Unblocked' }); }
+                  else { await base44.entities.Block.create({ blocked_id: otherUser?.id, blocked_name: otherUser?.display_name || otherUser?.full_name }); toast({ title: 'User blocked' }); }
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-secondary/40"
+              ><Ban className="w-4 h-4" /> Block / Unblock</button>
+              <button
+                onClick={async () => {
+                  await base44.entities.Report.create({ target_type: 'message', target_id: conversation?.id || '', target_name: otherUser?.display_name || otherUser?.full_name || 'Conversation', reason: 'harassment', details: 'Reported from direct message' });
+                  toast({ title: 'Conversation reported' });
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-secondary/40 text-destructive"
+              ><Flag className="w-4 h-4" /> Report conversation</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Messages */}

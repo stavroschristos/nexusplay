@@ -29,6 +29,10 @@ import Challenges from '@/pages/Challenges';
 import Assistant from '@/pages/Assistant';
 import Onboarding from '@/pages/Onboarding';
 import Admin from '@/pages/Admin';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import Terms from '@/pages/Terms';
+import CommunityGuidelines from '@/pages/CommunityGuidelines';
+import DataUsage from '@/pages/DataUsage';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -66,6 +70,10 @@ const AuthenticatedApp = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/waitlist" element={<Waitlist />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/guidelines" element={<CommunityGuidelines />} />
+      <Route path="/data-usage" element={<DataUsage />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>

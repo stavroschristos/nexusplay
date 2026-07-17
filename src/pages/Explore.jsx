@@ -59,7 +59,7 @@ export default function Explore() {
       base44.entities.GameReview.list('-created_date', 200),
       base44.entities.Post.list('-created_date', 200),
     ]).then(([allUsers, allAccounts, follows, comms, allGames, reviews, posts]) => {
-      setUsers(allUsers.filter((u) => u.id !== currentUser?.id));
+      setUsers(allUsers.filter((u) => u.id !== currentUser?.id && (u.privacy_profile || 'public') !== 'private'));
       const accMap = {};
       allAccounts.forEach((a) => {
         if (!accMap[a.created_by_id]) accMap[a.created_by_id] = [];
@@ -125,8 +125,10 @@ export default function Explore() {
   }, [users, currentUser]);
 
   const filtered = (list) => list.filter(({ user: u }) => {
+    // Private profiles are excluded from public discovery; never search by email.
+    if ((u.privacy_profile || 'public') === 'private') return false;
     if (!search) return true;
-    const name = (u.display_name || u.full_name || u.email || '').toLowerCase();
+    const name = (u.display_name || u.gamer_tag || u.full_name || '').toLowerCase();
     return name.includes(search.toLowerCase());
   });
 
@@ -365,7 +367,7 @@ function SectionHeader({ icon: Icon, title, subtitle }) {
 }
 
 function TrendingGamerRow({ user, breakdown, rank, accounts, isFollowing, onToggleFollow }) {
-  const initials = (user.display_name || user.full_name || user.email || 'G').charAt(0).toUpperCase();
+  const initials = (user.display_name || user.full_name || 'G').charAt(0).toUpperCase();
   const medalColor = rank === 0 ? 'text-amber-400' : rank === 1 ? 'text-slate-300' : rank === 2 ? 'text-orange-400' : 'text-muted-foreground';
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card/50 hover:ring-1 hover:ring-primary/30 transition-all">
@@ -394,7 +396,7 @@ function TrendingGamerRow({ user, breakdown, rank, accounts, isFollowing, onTogg
 }
 
 function CreatorCard({ user, accounts, breakdown, stats, isFollowing, onToggleFollow }) {
-  const initials = (user.display_name || user.full_name || user.email || 'G').charAt(0).toUpperCase();
+  const initials = (user.display_name || user.full_name || 'G').charAt(0).toUpperCase();
   return (
     <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-4 space-y-3">
       <div className="flex items-start gap-3">

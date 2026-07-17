@@ -7,7 +7,7 @@ import CompatibilityBreakdown from '@/components/explore/CompatibilityBreakdown'
 import { UserPlus, UserCheck, Trophy, Gamepad2 } from 'lucide-react';
 
 export default function GamerCard({ user, accounts = [], breakdown, isFollowing, onToggleFollow, showReasons = true }) {
-  const initials = (user.display_name || user.full_name || user.email || 'G').charAt(0).toUpperCase();
+  const initials = (user.display_name || user.full_name || 'G').charAt(0).toUpperCase();
 
   return (
     <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-4 space-y-3">

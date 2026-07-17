@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 export default function UserAvatar({ user, size = 'md', className }) {
-  const initials = (user?.display_name || user?.full_name || user?.email || 'G').charAt(0).toUpperCase();
+  const initials = (user?.display_name || user?.full_name || 'G').charAt(0).toUpperCase();
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',

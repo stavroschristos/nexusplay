@@ -140,7 +140,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
     toast({ title: 'Link copied' });
   };
 
-  const initials = (author?.display_name || author?.full_name || author?.email || 'G').charAt(0).toUpperCase();
+  const initials = (author?.display_name || author?.full_name || 'G').charAt(0).toUpperCase();
   const isOwner = post.created_by_id === user?.id;
   const isActivity = post.type === 'activity' && post.activity_type;
   const actConfig = isActivity ? activityConfig[post.activity_type] : null;

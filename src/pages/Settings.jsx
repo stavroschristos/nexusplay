@@ -16,6 +16,8 @@ import CustomizeSection from '@/components/settings/CustomizeSection';
 import TopListsSection from '@/components/settings/TopListsSection';
 import GamingSetupSection from '@/components/settings/GamingSetupSection';
 import MemoriesSection from '@/components/settings/MemoriesSection';
+import PrivacySection from '@/components/settings/PrivacySection';
+import AccountSection from '@/components/settings/AccountSection';
 import PageHeader from '@/components/shared/PageHeader';
 import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon } from 'lucide-react';
 
@@ -29,6 +31,7 @@ export default function Settings() {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
+  const [gamerTag, setGamerTag] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
@@ -59,6 +62,7 @@ export default function Settings() {
 
   useEffect(() => {
     setDisplayName(user?.display_name || '');
+    setGamerTag(user?.gamer_tag || '');
     setBio(user?.bio || '');
     setAvatarUrl(user?.avatar_url || '');
     setBannerUrl(user?.banner_url || '');
@@ -85,7 +89,7 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       await base44.auth.updateMe({
-        display_name: displayName, bio, avatar_url: avatarUrl, banner_url: bannerUrl,
+        display_name: displayName, gamer_tag: gamerTag, bio, avatar_url: avatarUrl, banner_url: bannerUrl,
         current_game: currentGame,
         favorite_games: favoriteGames.split(',').map((g) => g.trim()).filter(Boolean),
         favorite_franchises: favoriteFranchises.split(',').map((f) => f.trim()).filter(Boolean),
@@ -151,6 +155,10 @@ export default function Settings() {
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-8 pb-12 animate-fade-in">
       <PageHeader icon={SettingsIcon} title="Settings" subtitle="Manage your profile, accounts, and gaming identity" />
 
+      <AccountSection />
+
+      <section><PrivacySection /></section>
+
       {/* Activity Logging */}
       <ActivitySection onLogged={() => toast({ title: 'Activity shared!' })} />
 
@@ -205,8 +213,9 @@ export default function Settings() {
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Profile</h2>
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-5 space-y-4">
           <div className="grid sm:grid-cols-2 gap-3">
-            <div className="space-y-2"><Label>Display Name</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Gamer tag" className="bg-secondary/30" /></div>
-            <div className="space-y-2"><Label>Current Game</Label><Input value={currentGame} onChange={(e) => setCurrentGame(e.target.value)} placeholder="What are you playing now?" className="bg-secondary/30" /></div>
+            <div className="space-y-2"><Label>Display Name</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your public name" className="bg-secondary/30" /></div>
+            <div className="space-y-2"><Label>Gamer Tag</Label><Input value={gamerTag} onChange={(e) => setGamerTag(e.target.value)} placeholder="Unique handle (never your email)" className="bg-secondary/30" /></div>
+            <div className="space-y-2 sm:col-span-2"><Label>Current Game</Label><Input value={currentGame} onChange={(e) => setCurrentGame(e.target.value)} placeholder="What are you playing now?" className="bg-secondary/30" /></div>
           </div>
           <div className="space-y-2"><Label>Bio</Label><Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell others about yourself..." className="bg-secondary/30 resize-none" rows={3} /></div>
           <div className="grid sm:grid-cols-2 gap-3">

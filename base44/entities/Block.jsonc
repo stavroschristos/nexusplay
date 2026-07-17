@@ -1,0 +1,49 @@
+{
+  "name": "Block",
+  "type": "object",
+  "properties": {
+    "blocked_id": {
+      "type": "string",
+      "description": "The user being blocked"
+    },
+    "blocked_name": {
+      "type": "string",
+      "description": "Display name of the blocked user (denormalized)"
+    }
+  },
+  "required": [
+    "blocked_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
