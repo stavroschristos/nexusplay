@@ -130,7 +130,16 @@ export default function Communities() {
           {[...Array(4)].map((_, i) => <SkeletonCard key={i} className="h-44" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Users} title="No communities found" description="Be the first to create one for your favorite game or genre!" />
+        <EmptyState
+          icon={Users}
+          title={search ? 'No communities match your search' : 'No communities yet'}
+          description={search ? 'Try a different keyword or category.' : 'Be the first to create one for your favorite game or genre!'}
+          action={!search && (
+            <Button onClick={() => setShowForm(true)} className="rounded-full">
+              <Plus className="w-4 h-4" /> Create Community
+            </Button>
+          )}
+        />
       ) : (
         <div className="grid sm:grid-cols-2 gap-4 stagger">
           {filtered.map((c) => {

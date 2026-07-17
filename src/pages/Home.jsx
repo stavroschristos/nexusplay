@@ -41,7 +41,8 @@ export default function Home() {
       const authorIds = [...new Set(res.map((p) => p.created_by_id))];
       const missing = authorIds.filter((id) => id && !authors[id]);
       if (missing.length > 0) {
-        const users = await base44.entities.User.list();
+        const pubRes = await base44.functions.invoke('publicUsers', { action: 'list' });
+        const users = pubRes.data?.users || [];
         const map = { ...authors };
         users.forEach((u) => { map[u.id] = u; });
         setAuthors(map);

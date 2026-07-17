@@ -38,7 +38,8 @@ export default function LFG() {
     setPosts(res);
     const authorIds = [...new Set(res.map((p) => p.created_by_id))];
     if (authorIds.length > 0) {
-      const users = await base44.entities.User.list();
+      const pubRes = await base44.functions.invoke('publicUsers', { action: 'list' });
+      const users = pubRes.data?.users || [];
       const map = {};
       users.forEach((u) => { map[u.id] = u; });
       setAuthors(map);
@@ -134,7 +135,16 @@ export default function LFG() {
           {[...Array(3)].map((_, i) => <SkeletonCard key={i} className="h-36" />)}
         </div>
       ) : posts.length === 0 ? (
-        <EmptyState icon={Users} title="No LFG posts yet" description="Create one to find players for your next session!" />
+        <EmptyState
+          icon={Users}
+          title="No LFG posts yet"
+          description="Create one to find players for your next session!"
+          action={
+            <Button onClick={() => setShowForm(true)} className="rounded-full">
+              <Plus className="w-4 h-4" /> Post a Request
+            </Button>
+          }
+        />
       ) : (
         <div className="space-y-3 stagger">
           {posts.map((p) => {

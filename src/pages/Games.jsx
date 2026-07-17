@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import GameCard from '@/components/shared/GameCard';
@@ -32,7 +33,14 @@ export default function Games() {
           {[...Array(8)].map((_, i) => <SkeletonCard key={i} className="h-48" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Gamepad2} title="No games found" description={search ? `No games match "${search}"` : 'Games will appear here once added.'} />
+        <EmptyState
+          icon={Gamepad2}
+          title="No games found"
+          description={search ? `No games match "${search}"` : 'Games will appear here once added. In the meantime, explore what the community is playing.'}
+          action={!search && (
+            <Link to="/explore" className="inline-flex items-center gap-2 px-4 h-9 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Explore Gamers</Link>
+          )}
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 stagger">
           {filtered.map((g) => <GameCard key={g.id} game={g} />)}
