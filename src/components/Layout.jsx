@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const navGroups = [
   {
     items: [
-      { icon: Home, label: 'Home', path: '/' },
+      { icon: Home, label: 'Home', path: '/home' },
       { icon: Radio, label: 'Gaming Radar', path: '/radar' },
       { icon: Compass, label: 'Discover', path: '/explore' },
     ],
@@ -33,7 +33,7 @@ const navGroups = [
 ];
 
 const mobileNavItems = [
-  { icon: Home, label: 'Home', path: '/' },
+  { icon: Home, label: 'Home', path: '/home' },
   { icon: Compass, label: 'Discover', path: '/explore' },
   { icon: Trophy, label: 'Profile', path: '/profile' },
   { icon: MessagesSquare, label: 'Messages', path: '/messages' },
