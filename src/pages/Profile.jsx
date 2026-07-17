@@ -61,7 +61,7 @@ export default function Profile() {
     if (!profileId) return;
     setLoading(true);
     Promise.all([
-      profileId === currentUser?.id ? Promise.resolve(currentUser) : base44.entities.User.get(profileId),
+      profileId === currentUser?.id ? Promise.resolve(currentUser) : base44.functions.invoke('publicUsers', { action: 'get', id: profileId }).then((r) => r.data.user),
       base44.entities.Post.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.GameAccount.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.Achievement.filter({ created_by_id: profileId }, '-earned_date', 50),

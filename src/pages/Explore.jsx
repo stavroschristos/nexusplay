@@ -51,7 +51,7 @@ export default function Explore() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.User.list(),
+      base44.functions.invoke('publicUsers', { action: 'list' }).then((r) => r.data.users || []),
       base44.entities.GameAccount.list('-created_date', 200),
       base44.entities.Follow.filter({ follower_id: currentUser?.id }),
       base44.entities.Community.list('-members_count', 50),
