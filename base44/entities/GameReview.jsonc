@@ -2,6 +2,11 @@
   "name": "GameReview",
   "type": "object",
   "properties": {
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Demo/seed data flag"
+    },
     "game_id": {
       "type": "string",
       "description": "The game being reviewed"

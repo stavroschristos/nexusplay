@@ -2,6 +2,11 @@
   "name": "TopList",
   "type": "object",
   "properties": {
+    "is_demo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Demo/seed data flag"
+    },
     "title": {
       "type": "string",
       "description": "List title (e.g. Top 10 RPGs of All Time)"
