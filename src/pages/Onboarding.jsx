@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
@@ -12,6 +12,8 @@ import StepGames from '@/components/onboarding/StepGames';
 import StepConnect from '@/components/onboarding/StepConnect';
 import StepGenerate from '@/components/onboarding/StepGenerate';
 import StepRecommend from '@/components/onboarding/StepRecommend';
+import { trackJourney } from '@/lib/journey';
+import { markRegistered } from '@/lib/invites';
 
 const STEP_META = [
   { title: 'Welcome', desc: 'Let\'s get started' },
@@ -34,6 +36,11 @@ export default function Onboarding() {
   const [accounts, setAccounts] = useState([{ platform: 'PlayStation', username: '' }]);
   const [profile, setProfile] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    trackJourney('onboarding_started');
+    base44.auth.updateMe({ onboarding_started: true, signup_at: user?.signup_at || new Date().toISOString() }).catch(() => {});
+  }, []);
 
   const toggleArr = (setter) => (v) => setter((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
 
@@ -62,6 +69,15 @@ export default function Onboarding() {
       for (const acc of accounts) {
         if (acc.username.trim()) await base44.entities.GameAccount.create({ platform: acc.platform, username: acc.username.trim(), level: 0 });
       }
+      trackJourney('platforms_selected', { count: platforms.length });
+      trackJourney('favorite_games_selected', { count: games.length });
+      trackJourney('accounts_connected', { count: accounts.filter((a) => a.username.trim()).length });
+      trackJourney('onboarding_completed');
+      try {
+        const code = localStorage.getItem('nexus_invite_code');
+        if (code) await markRegistered(code, user?.id, user?.display_name || user?.full_name);
+        localStorage.removeItem('nexus_invite_code');
+      } catch { /* ignore */ }
       await checkUserAuth();
       toast({ title: 'Welcome to NexusPlay! 🎮', description: 'Your gaming identity is ready.' });
       navigate('/home');

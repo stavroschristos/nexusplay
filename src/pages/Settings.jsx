@@ -19,7 +19,9 @@ import MemoriesSection from '@/components/settings/MemoriesSection';
 import PrivacySection from '@/components/settings/PrivacySection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
 import AccountSection from '@/components/settings/AccountSection';
+import InviteSection from '@/components/settings/InviteSection';
 import { createNotification } from '@/lib/notifications';
+import { computeProfileCompletion, markActivatedIfNeeded, trackJourney } from '@/lib/journey';
 import PageHeader from '@/components/shared/PageHeader';
 import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon } from 'lucide-react';
 
@@ -43,6 +45,11 @@ export default function Settings() {
   const [favoriteGenres, setFavoriteGenres] = useState([]);
   const [platformsOwned, setPlatformsOwned] = useState([]);
   const [country, setCountry] = useState('');
+  const [gamingQuote, setGamingQuote] = useState('');
+  const [allTimeFav, setAllTimeFav] = useState('');
+  const [currentlyPlaying, setCurrentlyPlaying] = useState('');
+  const [lifeChanging, setLifeChanging] = useState('');
+  const [anticipated, setAnticipated] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [accounts, setAccounts] = useState([]);
@@ -74,6 +81,11 @@ export default function Settings() {
     setFavoriteGenres(user?.favorite_genres || []);
     setPlatformsOwned(user?.platforms_owned || []);
     setCountry(user?.country || '');
+    setGamingQuote(user?.gaming_quote || '');
+    setAllTimeFav((user?.all_time_favorites || []).join(', '));
+    setCurrentlyPlaying((user?.currently_playing || []).join(', '));
+    setLifeChanging((user?.life_changing_games || []).join(', '));
+    setAnticipated((user?.anticipated_games || []).join(', '));
     Promise.all([
       base44.entities.GameAccount.filter({ created_by_id: user?.id }, '-created_date', 50),
       base44.entities.Achievement.filter({ created_by_id: user?.id }, '-earned_date', 50),
@@ -90,16 +102,34 @@ export default function Settings() {
   const saveProfile = async () => {
     setSavingProfile(true);
     try {
+      const gamesArr = favoriteGames.split(',').map((g) => g.trim()).filter(Boolean);
+      const allTimeArr = allTimeFav.split(',').map((g) => g.trim()).filter(Boolean);
+      const playingArr = currentlyPlaying.split(',').map((g) => g.trim()).filter(Boolean);
+      const lifeArr = lifeChanging.split(',').map((g) => g.trim()).filter(Boolean);
+      const anticipArr = anticipated.split(',').map((g) => g.trim()).filter(Boolean);
+      const preview = { ...user, avatar_url: avatarUrl, bio, favorite_games: gamesArr, all_time_favorites: allTimeArr, currently_playing: playingArr, gamer_tag: gamerTag, display_name: displayName, favorite_genres: favoriteGenres, platforms_owned: platformsOwned, current_game: currentGame };
+      const completion = computeProfileCompletion(preview);
       await base44.auth.updateMe({
         display_name: displayName, gamer_tag: gamerTag, bio, avatar_url: avatarUrl, banner_url: bannerUrl,
         current_game: currentGame,
-        favorite_games: favoriteGames.split(',').map((g) => g.trim()).filter(Boolean),
+        favorite_games: gamesArr,
         favorite_franchises: favoriteFranchises.split(',').map((f) => f.trim()).filter(Boolean),
         favorite_genres: favoriteGenres,
         platforms_owned: platformsOwned,
         country,
+        gaming_quote: gamingQuote,
+        all_time_favorites: allTimeArr,
+        currently_playing: playingArr,
+        life_changing_games: lifeArr,
+        anticipated_games: anticipArr,
+        profile_completion: completion,
       });
       await checkUserAuth();
+      if (avatarUrl && !user?.avatar_url) trackJourney('avatar_added');
+      if (bio && !user?.bio) trackJourney('bio_added');
+      if (gamesArr.length && !(user?.favorite_games || []).length) trackJourney('favorite_games_added');
+      trackJourney('profile_saved', { completion });
+      markActivatedIfNeeded({ ...preview, has_onboarded: user?.has_onboarded }).catch(() => {});
       toast({ title: 'Profile updated!' });
     } catch {
       toast({ title: 'Failed to update profile', variant: 'destructive' });
@@ -165,6 +195,8 @@ export default function Settings() {
       <PageHeader icon={SettingsIcon} title="Settings" subtitle="Manage your profile, accounts, and gaming identity" />
 
       <AccountSection />
+
+      <InviteSection />
 
       <section><PrivacySection /></section>
 
@@ -235,6 +267,11 @@ export default function Settings() {
           </div>
           <div className="space-y-2"><Label>Favorite Games (comma separated)</Label><Input value={favoriteGames} onChange={(e) => setFavoriteGames(e.target.value)} placeholder="Elden Ring, Valorant..." className="bg-secondary/30" /></div>
           <div className="space-y-2"><Label>Favorite Franchises (comma separated)</Label><Input value={favoriteFranchises} onChange={(e) => setFavoriteFranchises(e.target.value)} placeholder="Final Fantasy, Halo..." className="bg-secondary/30" /></div>
+          <div className="space-y-2"><Label>Gaming Quote / Tagline</Label><Input value={gamingQuote} onChange={(e) => setGamingQuote(e.target.value)} placeholder="A gamer without a history is just a player..." className="bg-secondary/30" /></div>
+          <div className="space-y-2"><Label>All-Time Favorites (comma separated)</Label><Input value={allTimeFav} onChange={(e) => setAllTimeFav(e.target.value)} placeholder="Final Fantasy IX, The Witcher 3..." className="bg-secondary/30" /></div>
+          <div className="space-y-2"><Label>Currently Playing (comma separated)</Label><Input value={currentlyPlaying} onChange={(e) => setCurrentlyPlaying(e.target.value)} placeholder="Elden Ring, Hades II..." className="bg-secondary/30" /></div>
+          <div className="space-y-2"><Label>Games That Changed My Life (comma separated)</Label><Input value={lifeChanging} onChange={(e) => setLifeChanging(e.target.value)} placeholder="Final Fantasy VII, Dark Souls..." className="bg-secondary/30" /></div>
+          <div className="space-y-2"><Label>Most Anticipated (comma separated)</Label><Input value={anticipated} onChange={(e) => setAnticipated(e.target.value)} placeholder="GTA VI, Fable..." className="bg-secondary/30" /></div>
           <div className="space-y-2"><Label>Favorite Genres</Label><div className="flex flex-wrap gap-1.5">{allGenres.map((g) => <button key={g} onClick={() => toggleGenre(g)} className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${favoriteGenres.includes(g) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'}`}>{g}</button>)}</div></div>
           <div className="space-y-2"><Label>Platforms Owned</Label><div className="flex flex-wrap gap-1.5">{allPlatforms.map((p) => <button key={p} onClick={() => togglePlatform(p)} className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${platformsOwned.includes(p) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'}`}>{p}</button>)}</div></div>
           <div className="space-y-2"><Label>Country</Label><Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Your country" className="bg-secondary/30" /></div>

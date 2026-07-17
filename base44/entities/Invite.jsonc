@@ -1,0 +1,101 @@
+{
+  "name": "Invite",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Unique invite code / token"
+    },
+    "inviter_id": {
+      "type": "string",
+      "description": "The user who created the invite"
+    },
+    "inviter_name": {
+      "type": "string",
+      "description": "Inviter display name (denormalized for display)"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Optional email the invite was sent to"
+    },
+    "recipient_id": {
+      "type": "string",
+      "description": "The user who joined using this invite"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Joined user display name (denormalized)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin",
+        "founder"
+      ],
+      "default": "user",
+      "description": "Who issued the invite"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "opened",
+        "registered",
+        "activated",
+        "disabled"
+      ],
+      "default": "sent",
+      "description": "Lifecycle state of the invite"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invite was created"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invite link was first opened"
+    },
+    "registered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invitee created their account"
+    },
+    "activated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invitee became an activated gamer (profile + social)"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional admin note"
+    }
+  },
+  "required": [
+    "code",
+    "inviter_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {},
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

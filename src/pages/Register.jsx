@@ -10,6 +10,8 @@ import AuthLayout from "@/components/AuthLayout";
 import OAuthButtons from "@/components/auth/OAuthButtons";
 import { toast } from "@/components/ui/use-toast";
 import { getRegistrationMode } from "@/lib/registration";
+import { resolveInvite, markRegistered } from "@/lib/invites";
+import { trackJourney } from "@/lib/journey";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -54,6 +56,26 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
+      let source = "organic";
+      try {
+        const code = localStorage.getItem("nexus_invite_code");
+        if (code) {
+          const inv = await resolveInvite(code);
+          if (inv && inv.inviter_id) {
+            const me = await base44.auth.me();
+            await base44.auth.updateMe({
+              invited_by: inv.inviter_id,
+              invite_source: "invite_link",
+              registration_source: "invite",
+              signup_at: new Date().toISOString(),
+            });
+            await markRegistered(code, me?.id, me?.display_name || me?.full_name);
+            source = "invite";
+          }
+        }
+        localStorage.removeItem("nexus_invite_code");
+      } catch { /* ignore invite errors */ }
+      trackJourney("account_created", { source });
       window.location.href = "/onboarding";
     } catch (err) {
       setError(err.message || "Invalid verification code");

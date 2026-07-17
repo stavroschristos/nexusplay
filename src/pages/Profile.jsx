@@ -24,6 +24,9 @@ import { SkeletonCard } from '@/components/shared/Skeleton';
 import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap, Clock, Share2, ListOrdered, Monitor, Sparkles, Ban, ShieldAlert, Lock } from 'lucide-react';
 import ShareCard from '@/components/share/ShareCard';
 import NewUserChecklist from '@/components/onboarding/NewUserChecklist';
+import FounderBadge from '@/components/profile/FounderBadge';
+import GameShelfShowcase from '@/components/profile/GameShelfShowcase';
+import { recordFirstAction, markActivatedIfNeeded } from '@/lib/journey';
 import { createNotification } from '@/lib/notifications';
 import { canView, canMessage, displayName as publicName } from '@/lib/privacy';
 
@@ -108,6 +111,8 @@ export default function Profile() {
         link: `/profile/${currentUser?.id}`, icon: '🤝',
         actorId: currentUser?.id, actorName: currentUser?.display_name || currentUser?.full_name,
       });
+      recordFirstAction(currentUser, 'follow');
+      markActivatedIfNeeded(currentUser).catch(() => {});
     }
   };
 
@@ -259,6 +264,7 @@ export default function Profile() {
         <div className="mt-3">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-bold font-heading">{profileUser.display_name || profileUser.full_name || 'Gamer'}</h1>
+            {profileUser.is_founder && <FounderBadge />}
             {profileUser.is_alpha_tester && (
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">★ Alpha Tester</span>
             )}
@@ -271,6 +277,7 @@ export default function Profile() {
             <p className="text-sm text-muted-foreground">@{profileUser.gamer_tag}</p>
           ) : null}
           {profileUser.bio && <p className="text-sm mt-2 text-foreground/80">{profileUser.bio}</p>}
+          {profileUser.gaming_quote && <p className="text-sm mt-2 italic text-primary/80 font-medium">&ldquo;{profileUser.gaming_quote}&rdquo;</p>}
 
           {profileUser.current_game && canView(profileUser, 'privacy_current_game', viewer) && (
             <div className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-sm">
@@ -347,7 +354,12 @@ export default function Profile() {
             <div className="space-y-4 stagger">{posts.map((p) => <PostCard key={p.id} post={p} author={profileUser} />)}</div>
           )
         )}
-        {tab === 'favorites' && <FavoriteGamesShowcase favoriteGames={profileUser.favorite_games} games={games} />}
+        {tab === 'favorites' && (
+          <div className="space-y-6">
+            <FavoriteGamesShowcase favoriteGames={profileUser.favorite_games} games={games} />
+            <GameShelfShowcase user={profileUser} />
+          </div>
+        )}
         {tab === 'showcase' && <AchievementShowcase achievements={achievements} isOwn={isOwn} />}
         {tab === 'toplists' && (
           topLists.length === 0 ? <EmptyState icon={ListOrdered} title="No top lists yet" description={isOwn ? "Create ranked lists of your favorite games to showcase your taste." : undefined} /> : (

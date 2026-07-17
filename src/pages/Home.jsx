@@ -14,6 +14,8 @@ import EmptyState from '@/components/shared/EmptyState';
 import { SkeletonFeed } from '@/components/shared/Skeleton';
 import { Sparkles, TrendingUp, Flame, Users, LayoutDashboard, MessageSquare, Compass, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getFounder } from '@/lib/founder';
+import FounderBadge from '@/components/profile/FounderBadge';
 
 export default function Home() {
   const { user, checkUserAuth } = useAuth();
@@ -23,6 +25,7 @@ export default function Home() {
   const [feedFilter, setFeedFilter] = useState('all');
   const [view, setView] = useState('dashboard');
   const [trendingGames, setTrendingGames] = useState([]);
+  const [founder, setFounder] = useState(null);
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
@@ -49,6 +52,7 @@ export default function Home() {
 
   useEffect(() => {
     base44.entities.Game.list('-created_date', 10).then(setTrendingGames).catch(() => {});
+    getFounder().then(setFounder).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -157,6 +161,14 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {founder && (
+          <Link to={`/profile/${founder.id}`} className="block rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-fuchsia-500/5 p-4 hover:border-amber-500/50 transition-colors">
+            <div className="mb-2"><FounderBadge /></div>
+            <p className="text-sm font-semibold">{founder.display_name || 'The Founder'}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">See what a complete gaming identity looks like — the profile this platform was built around.</p>
+          </Link>
+        )}
       </aside>
     </div>
   );

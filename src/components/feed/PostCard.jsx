@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import ReactionBar from '@/components/shared/ReactionBar';
 import { createNotification } from '@/lib/notifications';
+import { recordFirstAction, markActivatedIfNeeded } from '@/lib/journey';
 import { cn } from '@/lib/utils';
 
 const activityConfig = {
@@ -65,6 +66,8 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
           metadata: { post_id: post.id },
         });
       }
+      recordFirstAction(user, 'like');
+      markActivatedIfNeeded(user).catch(() => {});
     }
   };
 
@@ -99,6 +102,8 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
           metadata: { post_id: post.id },
         });
       }
+      recordFirstAction(user, 'comment');
+      markActivatedIfNeeded(user).catch(() => {});
     } catch {
       toast({ title: 'Failed to comment', variant: 'destructive' });
     } finally {

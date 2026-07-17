@@ -13,6 +13,15 @@
       "default": false,
       "description": "Whether this user is a designated alpha tester"
     },
+    "is_founder": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this account is the platform founder showcase profile"
+    },
+    "gaming_quote": {
+      "type": "string",
+      "description": "Favorite gaming quote or tagline shown on the profile"
+    },
     "display_name": {
       "type": "string",
       "description": "Gamer display name / handle"
@@ -68,6 +77,34 @@
         "type": "string"
       },
       "description": "Favorite genres"
+    },
+    "all_time_favorites": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All-time favorite games"
+    },
+    "currently_playing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Games currently being played"
+    },
+    "life_changing_games": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Games that changed the user's life"
+    },
+    "anticipated_games": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Most anticipated upcoming games"
     },
     "current_game": {
       "type": "string",
@@ -320,6 +357,11 @@
       "default": false,
       "description": "Whether the user has seen the first-session welcome screen"
     },
+    "onboarding_started": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user started the onboarding flow"
+    },
     "onboarding_completed_at": {
       "type": "string",
       "format": "date-time",
@@ -329,6 +371,70 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the profile-completion reward (XP/badge) was granted"
+    },
+    "invited_by": {
+      "type": "string",
+      "description": "User id of the inviter who brought this user to the platform"
+    },
+    "invite_source": {
+      "type": "string",
+      "description": "How the user joined (organic, invite_link, admin_invite, waitlist)"
+    },
+    "registration_source": {
+      "type": "string",
+      "description": "Original registration channel"
+    },
+    "signup_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the account was created (registration completed)"
+    },
+    "invite_limit": {
+      "type": "number",
+      "default": 5,
+      "description": "Maximum invites this user can issue"
+    },
+    "profile_completion": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Computed 0-100 gaming identity completion score"
+    },
+    "activated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user reached the activation milestone (onboarded + identity + social)"
+    },
+    "first_follow_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user followed their first gamer"
+    },
+    "first_community_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user joined their first community"
+    },
+    "first_post_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user created their first post"
+    },
+    "first_comment_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user created their first comment"
+    },
+    "first_like_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user gave their first like"
+    },
+    "first_message_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user sent their first direct message"
     },
     "notif_followers": {
       "type": "boolean",

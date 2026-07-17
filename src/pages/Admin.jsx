@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { LayoutDashboard, Gamepad2, Flag, BarChart3, Settings as SettingsIcon, ShieldAlert, UserCheck, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Gamepad2, Flag, BarChart3, Settings as SettingsIcon, ShieldAlert, UserCheck, MessageSquare, Crown, Gift, LineChart } from 'lucide-react';
 import AdminOverview from '@/components/admin/AdminOverview';
 import AdminGaming from '@/components/admin/AdminGaming';
 import AdminModeration from '@/components/admin/AdminModeration';
@@ -11,6 +11,9 @@ import AdminSettings from '@/components/admin/AdminSettings';
 import AdminRegistration from '@/components/admin/AdminRegistration';
 import AdminFeedback from '@/components/admin/AdminFeedback';
 import AdminNotifications from '@/components/admin/AdminNotifications';
+import AdminInvites from '@/components/admin/AdminInvites';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
+import AdminFounder from '@/components/admin/AdminFounder';
 import { Bell } from 'lucide-react';
 
 const TABS = [
@@ -18,7 +21,10 @@ const TABS = [
   { key: 'gaming', label: 'Gaming', icon: Gamepad2 },
   { key: 'moderation', label: 'Moderation', icon: Flag },
   { key: 'registration', label: 'Registration', icon: UserCheck },
+  { key: 'invites', label: 'Invites', icon: Gift },
+  { key: 'founder', label: 'Founder', icon: Crown },
   { key: 'feedback', label: 'Feedback', icon: MessageSquare },
+  { key: 'analytics', label: 'Analytics', icon: LineChart },
   { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'features', label: 'Features', icon: BarChart3 },
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
@@ -75,6 +81,9 @@ export default function Admin() {
       {tab === 'features' && <AdminFeatures />}
       {tab === 'registration' && <AdminRegistration />}
       {tab === 'feedback' && <AdminFeedback />}
+      {tab === 'invites' && <AdminInvites />}
+      {tab === 'founder' && <AdminFounder />}
+      {tab === 'analytics' && <AdminAnalytics />}
       {tab === 'notifications' && <AdminNotifications />}
       {tab === 'settings' && <AdminSettings />}
     </div>
