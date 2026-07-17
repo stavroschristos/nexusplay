@@ -20,6 +20,7 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [regMode, setRegMode] = useState("public");
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => { getRegistrationMode().then(setRegMode); }, []);
 
@@ -28,6 +29,10 @@ export default function Register() {
     setError("");
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+    if (!agreed) {
+      setError("Please review and accept the Terms of Service and Privacy Policy to continue");
       return;
     }
     setLoading(true);
@@ -238,7 +243,21 @@ export default function Register() {
             />
           </div>
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+        <label className="flex items-start gap-3 text-sm text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded border-border accent-primary shrink-0"
+          />
+          <span>
+            I have read and agree to the{" "}
+            <Link to="/terms" target="_blank" className="text-primary font-medium hover:underline">Terms of Service</Link>{" "}
+            and{" "}
+            <Link to="/privacy" target="_blank" className="text-primary font-medium hover:underline">Privacy Policy</Link>.
+          </span>
+        </label>
+        <Button type="submit" className="w-full h-12 font-medium" disabled={loading || !agreed}>
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -248,6 +267,12 @@ export default function Register() {
             "Create account"
           )}
         </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          By creating an account you also acknowledge our{" "}
+          <Link to="/guidelines" target="_blank" className="text-primary hover:underline">Community Guidelines</Link>{" "}
+          and{" "}
+          <Link to="/cookies" target="_blank" className="text-primary hover:underline">Cookie Policy</Link>.
+        </p>
       </form>
     </AuthLayout>
   );

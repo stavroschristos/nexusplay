@@ -3,7 +3,7 @@ import { Gamepad2 } from 'lucide-react';
 
 const cols = [
   { title: 'Platform', links: [['About', '#'], ['Careers', '#'], ['Blog', '#'], ['Contact', '#']] },
-  { title: 'Legal', links: [['Privacy Policy', '/privacy'], ['Terms of Service', '/terms'], ['Community Guidelines', '/guidelines'], ['Data Usage', '/data-usage']] },
+  { title: 'Legal', links: [['Privacy Policy', '/privacy'], ['Terms of Service', '/terms'], ['Community Guidelines', '/guidelines'], ['Cookie Policy', '/cookies'], ['Data Usage', '/data-usage']] },
   { title: 'Community', links: [['Communities', '#'], ['Games', '#'], ['Gaming Radar', '#'], ['Gaming Wrapped', '#']] },
 ];
 

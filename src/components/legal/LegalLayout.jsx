@@ -18,6 +18,7 @@ export default function LegalLayout({ title, lastUpdated, children }) {
           <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
           <Link to="/guidelines" className="hover:text-foreground">Community Guidelines</Link>
           <Link to="/data-usage" className="hover:text-foreground">Data Usage</Link>
+          <Link to="/cookies" className="hover:text-foreground">Cookie Policy</Link>
         </div>
       </div>
     </div>

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import {
-  Mail, Download, Trash2, Shield, AlertTriangle, Loader2, LogOut, Pencil,
+  Mail, Download, Trash2, Shield, AlertTriangle, Loader2, LogOut, Pencil, FileText,
 } from 'lucide-react';
 
 export default function AccountSection() {
@@ -147,6 +147,17 @@ export default function AccountSection() {
             </Button>
           </div>
         )}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card/50 p-4 space-y-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Legal & policies</h3>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+          <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+          <Link to="/guidelines" className="hover:text-foreground">Community Guidelines</Link>
+          <Link to="/cookies" className="hover:text-foreground">Cookie Policy</Link>
+          <Link to="/data-usage" className="hover:text-foreground">Data Usage</Link>
+        </div>
       </div>
 
       <Button variant="ghost" className="rounded-full text-muted-foreground" onClick={() => logout()}>
