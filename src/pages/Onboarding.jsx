@@ -3,136 +3,122 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Loader2, Gamepad2, Trophy, Users, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { Loader2, Gamepad2, Check, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import StepWelcome from '@/components/onboarding/StepWelcome';
+import StepPlatforms from '@/components/onboarding/StepPlatforms';
+import StepGenres from '@/components/onboarding/StepGenres';
+import StepGames from '@/components/onboarding/StepGames';
+import StepConnect from '@/components/onboarding/StepConnect';
+import StepGenerate from '@/components/onboarding/StepGenerate';
+import StepRecommend from '@/components/onboarding/StepRecommend';
 
-const identities = [
-  { key: 'The Completionist', desc: 'I hunt every trophy and 100% my games.', icon: Trophy },
-  { key: 'The Explorer', desc: 'I love discovering worlds and secrets.', icon: Sparkles },
-  { key: 'The Competitor', desc: 'I play to win and climb the ranks.', icon: Gamepad2 },
-  { key: 'The Story Lover', desc: 'I play for narrative and characters.', icon: Users },
+const STEP_META = [
+  { title: 'Welcome', desc: 'Let\'s get started' },
+  { title: 'Your platforms', desc: 'Where do you play?' },
+  { title: 'Your genres', desc: 'Pick at least 2' },
+  { title: 'Your games', desc: 'What do you love?' },
+  { title: 'Connect accounts', desc: 'Optional' },
+  { title: 'Your identity', desc: 'Generating…' },
+  { title: 'Recommendations', desc: 'For you' },
 ];
-
-const genres = ['RPG', 'Action', 'Adventure', 'Shooter', 'Strategy', 'Horror', 'Racing', 'Sports', 'Fighting', 'Puzzle', 'Roguelike', 'Indie', 'MMO', 'Sandbox'];
-const platforms = ['PlayStation 5', 'Xbox Series X', 'PC', 'Nintendo Switch', 'Mobile'];
 
 export default function Onboarding() {
   const { user, checkUserAuth } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const [identity, setIdentity] = useState('');
-  const [favGenres, setFavGenres] = useState([]);
-  const [platformsOwned, setPlatformsOwned] = useState([]);
+  const [platforms, setPlatforms] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [games, setGames] = useState([]);
   const [accounts, setAccounts] = useState([{ platform: 'PlayStation', username: '' }]);
+  const [profile, setProfile] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const toggleGenre = (g) => setFavGenres((p) => p.includes(g) ? p.filter((x) => x !== g) : [...p, g]);
-  const togglePlatform = (p) => setPlatformsOwned((p2) => p2.includes(p) ? p2.filter((x) => x !== p) : [...p2, p]);
+  const toggleArr = (setter) => (v) => setter((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]));
+
+  const canProceed = [
+    true,
+    platforms.length > 0,
+    genres.length >= 2,
+    games.length > 0,
+    true,
+    !!profile,
+    true,
+  ][step];
 
   const finish = async () => {
     setSaving(true);
     try {
       await base44.auth.updateMe({
-        gaming_personality: identity,
-        favorite_genres: favGenres,
-        platforms_owned: platformsOwned,
+        platforms_owned: platforms,
+        favorite_genres: genres,
+        favorite_games: games,
+        gaming_personality: profile?.personality || '',
+        identity_archetype: profile?.archetype || '',
+        identity_summary: profile?.summary || '',
         has_onboarded: true,
       });
       for (const acc of accounts) {
         if (acc.username.trim()) await base44.entities.GameAccount.create({ platform: acc.platform, username: acc.username.trim(), level: 0 });
       }
       await checkUserAuth();
-      toast({ title: 'Welcome to NEXUS! 🎮' });
-      navigate('/');
-    } catch {
-      toast({ title: 'Something went wrong', variant: 'destructive' });
+      toast({ title: 'Welcome to NexusPlay! 🎮', description: 'Your gaming identity is ready.' });
+      navigate('/home');
+    } catch (e) {
+      toast({ title: 'Something went wrong', description: e.message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
   };
 
-  const steps = [
-    {
-      title: 'Choose Your Gamer Identity',
-      desc: 'What kind of gamer are you?',
-      content: (
-        <div className="grid grid-cols-2 gap-3">
-          {identities.map((id) => (
-            <button key={id.key} onClick={() => setIdentity(id.key)} className={`p-4 rounded-2xl border text-left transition-all ${identity === id.key ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}>
-              <id.icon className={`w-6 h-6 mb-2 ${identity === id.key ? 'text-primary' : 'text-muted-foreground'}`} />
-              <p className="font-semibold text-sm">{id.key}</p>
-              <p className="text-xs text-muted-foreground mt-1">{id.desc}</p>
-            </button>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: 'Pick Your Favorite Genres',
-      desc: 'Select at least 2 to personalize your feed.',
-      content: (
-        <div className="flex flex-wrap gap-2">
-          {genres.map((g) => (
-            <button key={g} onClick={() => toggleGenre(g)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${favGenres.includes(g) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'}`}>{g}</button>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: 'What Do You Play On?',
-      desc: 'Select your platforms.',
-      content: (
-        <div className="flex flex-wrap gap-2">
-          {platforms.map((p) => (
-            <button key={p} onClick={() => togglePlatform(p)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${platformsOwned.includes(p) ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 text-muted-foreground hover:text-foreground'}`}>{p}</button>
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: 'Connect Your Accounts',
-      desc: 'Link your gaming profiles (optional).',
-      content: (
-        <div className="space-y-3">
-          {accounts.map((acc, i) => (
-            <div key={i} className="flex gap-2">
-              <select value={acc.platform} onChange={(e) => setAccounts((a) => a.map((x, j) => j === i ? { ...x, platform: e.target.value } : x))} className="w-32 rounded-lg border border-input bg-secondary/30 px-3 text-sm">
-                {['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net'].map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <input value={acc.username} onChange={(e) => setAccounts((a) => a.map((x, j) => j === i ? { ...x, username: e.target.value } : x))} placeholder="Username" className="flex-1 rounded-lg border border-input bg-secondary/30 px-3 text-sm" />
-            </div>
-          ))}
-          <button onClick={() => setAccounts((a) => [...a, { platform: 'Steam', username: '' }])} className="text-sm text-primary hover:underline">+ Add another</button>
-        </div>
-      ),
-    },
-  ];
-
-  const canProceed = step === 0 ? !!identity : step === 1 ? favGenres.length >= 2 : step === 2 ? platformsOwned.length > 0 : true;
+  const stepContent = () => {
+    switch (step) {
+      case 0: return <StepWelcome name={user?.display_name || user?.full_name} />;
+      case 1: return <StepPlatforms value={platforms} toggle={toggleArr(setPlatforms)} />;
+      case 2: return <StepGenres value={genres} toggle={toggleArr(setGenres)} />;
+      case 3: return <StepGames value={games} toggle={toggleArr(setGames)} addCustom={(t) => setGames((p) => [...p, t])} />;
+      case 4: return <StepConnect accounts={accounts} setAccounts={setAccounts} />;
+      case 5: return <StepGenerate selections={{ platforms, genres, games }} profile={profile} onGenerated={setProfile} />;
+      case 6: return <StepRecommend genres={genres} games={games} />;
+      default: return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center glow"><Gamepad2 className="w-5 h-5 text-primary-foreground" /></div>
-          <span className="font-heading font-bold text-2xl">NEXUS</span>
+    <div className="min-h-screen flex items-center justify-center p-4 py-10 relative overflow-hidden">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-violet-950/40 via-background to-background" />
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[120vw] h-[40vh] bg-[radial-gradient(ellipse_at_center,hsl(271_81%_56%/0.16),transparent_60%)]" />
+
+      <div className="max-w-lg w-full">
+        <div className="flex items-center justify-center gap-2 mb-7">
+          <div className="w-9 h-9 rounded-xl bg-primary grid place-items-center glow"><Gamepad2 className="w-5 h-5 text-primary-foreground" /></div>
+          <span className="font-heading font-bold text-xl">NexusPlay</span>
         </div>
 
-        <div className="flex gap-1.5 mb-6">
-          {steps.map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= step ? 'bg-primary' : 'bg-secondary'}`} />)}
+        <div className="flex gap-1.5 mb-5">
+          {STEP_META.map((_, i) => (
+            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= step ? 'bg-primary' : 'bg-secondary'}`} />
+          ))}
         </div>
 
-        <div className="rounded-3xl border border-border bg-card/50 backdrop-blur-sm p-6">
-          <h2 className="text-xl font-bold font-heading mb-1">{steps[step].title}</h2>
-          <p className="text-sm text-muted-foreground mb-5">{steps[step].desc}</p>
-          <div key={step} className="animate-slide-up">{steps[step].content}</div>
+        <div className="rounded-3xl border border-border bg-card/50 backdrop-blur-md p-6 shadow-2xl">
+          <div className="mb-5">
+            <p className="text-xs text-muted-foreground">Step {step + 1} of {STEP_META.length}</p>
+            <h2 className="text-xl font-heading font-bold mt-0.5">{STEP_META[step].title}</h2>
+            <p className="text-sm text-muted-foreground">{STEP_META[step].desc}</p>
+          </div>
+          <div key={step} className="animate-slide-up min-h-[220px]">{stepContent()}</div>
           <div className="flex gap-2 mt-6">
             {step > 0 && <Button variant="outline" onClick={() => setStep(step - 1)} className="rounded-full">Back</Button>}
-            {step < steps.length - 1 ? (
-              <Button onClick={() => setStep(step + 1)} disabled={!canProceed} className="flex-1 rounded-full">Continue <ArrowRight className="w-4 h-4" /></Button>
+            {step < STEP_META.length - 1 ? (
+              <Button onClick={() => setStep(step + 1)} disabled={!canProceed} className="flex-1 rounded-full">
+                Continue <ArrowRight className="w-4 h-4" />
+              </Button>
             ) : (
-              <Button onClick={finish} disabled={saving} className="flex-1 rounded-full">{saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enter NEXUS</Button>
+              <Button onClick={finish} disabled={saving} className="flex-1 rounded-full">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enter NexusPlay
+              </Button>
             )}
           </div>
         </div>
