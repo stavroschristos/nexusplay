@@ -13,6 +13,9 @@ import CollectionsSection from '@/components/settings/CollectionsSection';
 import MilestonesSection from '@/components/settings/MilestonesSection';
 import StatsSection from '@/components/settings/StatsSection';
 import CustomizeSection from '@/components/settings/CustomizeSection';
+import AvatarUploader from '@/components/settings/AvatarUploader';
+import BannerUploader from '@/components/settings/BannerUploader';
+import { PROFILE_THEMES } from '@/components/profile/themeConfig';
 import TopListsSection from '@/components/settings/TopListsSection';
 import GamingSetupSection from '@/components/settings/GamingSetupSection';
 import MemoriesSection from '@/components/settings/MemoriesSection';
@@ -264,10 +267,8 @@ export default function Settings() {
             <div className="space-y-2 sm:col-span-2"><Label>Current Game</Label><Input value={currentGame} onChange={(e) => setCurrentGame(e.target.value)} placeholder="What are you playing now?" className="bg-secondary/30" /></div>
           </div>
           <div className="space-y-2"><Label>Bio</Label><Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell others about yourself..." className="bg-secondary/30 resize-none" rows={3} /></div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div className="space-y-2"><Label>Avatar URL</Label><Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." className="bg-secondary/30" /></div>
-            <div className="space-y-2"><Label>Banner URL</Label><Input value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} placeholder="https://..." className="bg-secondary/30" /></div>
-          </div>
+          <div className="space-y-2"><Label>Avatar</Label><AvatarUploader value={avatarUrl} onChange={setAvatarUrl} displayName={displayName} /></div>
+          <div className="space-y-2"><Label>Profile Banner</Label><BannerUploader value={bannerUrl} onChange={setBannerUrl} themeBanner={PROFILE_THEMES[user?.profile_theme || 'nebula']?.banner} /></div>
           <div className="space-y-2"><Label>Favorite Games (comma separated)</Label><Input value={favoriteGames} onChange={(e) => setFavoriteGames(e.target.value)} placeholder="Elden Ring, Valorant..." className="bg-secondary/30" /></div>
           <div className="space-y-2"><Label>Favorite Franchises (comma separated)</Label><Input value={favoriteFranchises} onChange={(e) => setFavoriteFranchises(e.target.value)} placeholder="Final Fantasy, Halo..." className="bg-secondary/30" /></div>
           <div className="space-y-2"><Label>Gaming Quote / Tagline</Label><Input value={gamingQuote} onChange={(e) => setGamingQuote(e.target.value)} placeholder="A gamer without a history is just a player..." className="bg-secondary/30" /></div>
