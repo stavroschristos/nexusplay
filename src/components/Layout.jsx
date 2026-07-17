@@ -135,7 +135,7 @@ export default function Layout() {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user?.display_name || user?.full_name || 'Gamer'}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.gamer_tag ? `@${user.gamer_tag}` : 'Set your gamer tag'}</p>
             </div>
           </Link>
           <button onClick={() => logout()} className="w-full flex items-center gap-3 px-3 py-2.5 mt-1 rounded-lg text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">

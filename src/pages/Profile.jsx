@@ -61,7 +61,7 @@ export default function Profile() {
     if (!profileId) return;
     setLoading(true);
     Promise.all([
-      base44.entities.User.list(),
+      profileId === currentUser?.id ? Promise.resolve(currentUser) : base44.entities.User.get(profileId),
       base44.entities.Post.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.GameAccount.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.Achievement.filter({ created_by_id: profileId }, '-earned_date', 50),
@@ -74,8 +74,7 @@ export default function Profile() {
       base44.entities.Game.list('-created_date', 200),
       base44.entities.Follow.filter({ following_id: profileId }),
       base44.entities.Follow.filter({ follower_id: profileId }),
-    ]).then(([users, userPosts, userAccounts, userAch, userCols, userReviews, userMilestones, userMemories, userTopLists, userSetups, allGames, followersList, followingList]) => {
-      const u = users.find((x) => x.id === profileId) || (profileId === currentUser?.id ? currentUser : null);
+    ]).then(([u, userPosts, userAccounts, userAch, userCols, userReviews, userMilestones, userMemories, userTopLists, userSetups, allGames, followersList, followingList]) => {
       setProfileUser(u);
       setPosts(userPosts);
       setAccounts(userAccounts);
@@ -270,11 +269,11 @@ export default function Profile() {
             )}
             <PersonalityBadge personality={profileUser.gaming_personality} />
           </div>
-          {/* Email is private account data — only visible to the account owner */}
-          {isOwn ? (
-            <p className="text-sm text-muted-foreground">{profileUser.email}</p>
-          ) : profileUser.gamer_tag ? (
+          {/* Public handle — email is private and never shown on profiles */}
+          {profileUser.gamer_tag ? (
             <p className="text-sm text-muted-foreground">@{profileUser.gamer_tag}</p>
+          ) : isOwn ? (
+            <p className="text-sm text-muted-foreground/70 italic">Set your gamer tag in Settings → Profile</p>
           ) : null}
           {profileUser.bio && <p className="text-sm mt-2 text-foreground/80">{profileUser.bio}</p>}
           {profileUser.gaming_quote && <p className="text-sm mt-2 italic text-primary/80 font-medium">&ldquo;{profileUser.gaming_quote}&rdquo;</p>}

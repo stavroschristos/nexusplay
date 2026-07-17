@@ -124,7 +124,9 @@ export default function AccountSection() {
 
       <div className="grid sm:grid-cols-2 gap-3">
         <Button asChild variant="outline" className="rounded-xl h-auto py-4 justify-start">
-          <div><Pencil className="w-4 h-4" /> <span className="text-sm font-medium">Edit profile & gaming identity</span></div>
+          <a href="#edit-profile" onClick={() => document.getElementById('edit-profile')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+            <Pencil className="w-4 h-4" /> <span className="text-sm font-medium">Edit profile & gaming identity</span>
+          </a>
         </Button>
         <Button variant="outline" className="rounded-xl h-auto py-4 justify-start" onClick={downloadData} disabled={downloading}>
           {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} <span className="text-sm font-medium">Download my data</span>

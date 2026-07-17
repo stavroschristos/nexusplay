@@ -252,7 +252,7 @@ export default function Settings() {
       <section><MemoriesSection memories={memories} onAdded={(m) => setMemories((prev) => [m, ...prev])} onRemoved={(id) => setMemories((prev) => prev.filter((x) => x.id !== id))} /></section>
 
       {/* Profile */}
-      <section className="space-y-4">
+      <section id="edit-profile" className="space-y-4 scroll-mt-24">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Profile</h2>
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-5 space-y-4">
           <div className="grid sm:grid-cols-2 gap-3">
