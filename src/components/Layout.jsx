@@ -4,8 +4,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { base44 } from '@/api/base44Client';
 import { trackPageView } from '@/lib/analytics';
-import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X } from 'lucide-react';
+import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X, Rocket } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import FeedbackWidget from '@/components/feedback/FeedbackWidget';
 
 const navGroups = [
   {
@@ -27,6 +28,7 @@ const navGroups = [
       { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
       { icon: MessagesSquare, label: 'Messages', path: '/messages' },
       { icon: Flame, label: 'Wrapped', path: '/wrapped' },
+      { icon: Rocket, label: 'Roadmap', path: '/roadmap' },
       { icon: Trophy, label: 'My Profile', path: '/profile' },
     ],
   },
@@ -162,6 +164,8 @@ export default function Layout() {
         )}
         <Outlet />
       </main>
+
+      <FeedbackWidget />
     </div>
   );
 }

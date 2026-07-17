@@ -1,0 +1,91 @@
+{
+  "name": "FeatureRequest",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Feature suggestion title"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the feature is and why it matters"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "feature",
+        "improvement",
+        "bug",
+        "integration",
+        "other"
+      ],
+      "default": "feature",
+      "description": "Request category"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewing",
+        "planned",
+        "in_development",
+        "completed",
+        "declined"
+      ],
+      "default": "new",
+      "description": "Internal review status"
+    },
+    "roadmap_stage": {
+      "type": "string",
+      "enum": [
+        "none",
+        "coming_soon",
+        "in_development",
+        "recently_released"
+      ],
+      "default": "none",
+      "description": "Public roadmap display stage"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Priority"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this request is visible on the public roadmap"
+    },
+    "admin_note": {
+      "type": "string",
+      "description": "Internal admin note"
+    },
+    "submitted_by_name": {
+      "type": "string",
+      "description": "Submitter display name (denormalized)"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

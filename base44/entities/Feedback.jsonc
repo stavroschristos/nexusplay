@@ -1,0 +1,154 @@
+{
+  "name": "Feedback",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "bug",
+        "feature",
+        "ux",
+        "design",
+        "performance",
+        "content",
+        "general"
+      ],
+      "default": "general",
+      "description": "Feedback type"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short summary of the feedback"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed feedback"
+    },
+    "screenshot_url": {
+      "type": "string",
+      "description": "Uploaded screenshot or recording URL"
+    },
+    "page_url": {
+      "type": "string",
+      "description": "Full URL where feedback was submitted"
+    },
+    "page_path": {
+      "type": "string",
+      "description": "Path where feedback was submitted"
+    },
+    "feature_key": {
+      "type": "string",
+      "description": "Feature area derived from the page"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "How was your experience on this page (1-5)"
+    },
+    "browser": {
+      "type": "string",
+      "description": "Browser type"
+    },
+    "device_type": {
+      "type": "string",
+      "description": "Device type (Desktop, Mobile, Tablet)"
+    },
+    "os": {
+      "type": "string",
+      "description": "Operating system"
+    },
+    "app_version": {
+      "type": "string",
+      "description": "App version at submission time"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Session identifier"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Submitter display name (denormalized)"
+    },
+    "user_type": {
+      "type": "string",
+      "enum": [
+        "alpha_tester",
+        "regular_user",
+        "admin"
+      ],
+      "description": "Submitter user type"
+    },
+    "is_alpha_tester": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether submitter is an alpha tester"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewing",
+        "planned",
+        "in_development",
+        "completed",
+        "declined"
+      ],
+      "default": "new",
+      "description": "Review status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Triage priority"
+    },
+    "admin_response": {
+      "type": "string",
+      "description": "Optional response to the user"
+    },
+    "admin_note": {
+      "type": "string",
+      "description": "Internal admin note"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Admin assigned to handle this feedback"
+    }
+  },
+  "required": [
+    "category",
+    "title",
+    "description"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

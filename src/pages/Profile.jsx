@@ -201,6 +201,9 @@ export default function Profile() {
         <div className="mt-3">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-bold font-heading">{profileUser.display_name || profileUser.full_name || 'Gamer'}</h1>
+            {profileUser.is_alpha_tester && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">★ Alpha Tester</span>
+            )}
             <PersonalityBadge personality={profileUser.gaming_personality} />
           </div>
           <p className="text-sm text-muted-foreground">{profileUser.email}</p>

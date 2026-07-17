@@ -1,0 +1,26 @@
+{
+  "name": "FeatureVote",
+  "type": "object",
+  "properties": {
+    "feature_request_id": {
+      "type": "string",
+      "description": "The feature request being voted on"
+    },
+    "voter_name": {
+      "type": "string",
+      "description": "Voter display name (denormalized)"
+    }
+  },
+  "required": [
+    "feature_request_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

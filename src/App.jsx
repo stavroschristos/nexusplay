@@ -23,6 +23,7 @@ import CollectionDetail from '@/pages/CollectionDetail';
 import LFG from '@/pages/LFG';
 import Notifications from '@/pages/Notifications';
 import Wrapped from '@/pages/Wrapped';
+import Roadmap from '@/pages/Roadmap';
 import Radar from '@/pages/Radar';
 import Challenges from '@/pages/Challenges';
 import Assistant from '@/pages/Assistant';
@@ -83,6 +84,7 @@ const AuthenticatedApp = () => {
           <Route path="/lfg" element={<LFG />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/wrapped" element={<Wrapped />} />
+          <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/radar" element={<Radar />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/assistant" element={<Assistant />} />
