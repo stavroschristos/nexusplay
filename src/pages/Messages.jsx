@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import ConversationList from '@/components/messages/ConversationList';
@@ -78,7 +78,12 @@ export default function Messages() {
             {loading ? (
               <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
             ) : conversations.length === 0 ? (
-              <EmptyState icon={MessagesSquare} title="No conversations yet" description="Start chatting from a gamer's profile!" />
+              <EmptyState
+                icon={MessagesSquare}
+                title="No messages yet"
+                description="Start connecting with gamers who share your interests."
+                action={<Link to="/explore" className="inline-flex items-center gap-2 px-4 h-9 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Find Gamers</Link>}
+              />
             ) : (
               <ConversationList
                 conversations={conversations}

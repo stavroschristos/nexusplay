@@ -25,6 +25,20 @@ const STEP_META = [
   { title: 'Recommendations', desc: 'For you' },
 ];
 
+// Steps a user can skip without being blocked from the platform (non-critical).
+const SKIPPABLE = new Set([1, 2, 3, 4, 5]);
+
+// Derive the first incomplete step from already-saved profile data so returning
+// users resume exactly where they left off.
+function computeResumeStep(u) {
+  if (!u) return 1;
+  if (!u.platforms_owned?.length) return 1;
+  if (!u.favorite_genres?.length || u.favorite_genres.length < 2) return 2;
+  if (!u.favorite_games?.length) return 3;
+  if (!u.gaming_personality) return 5; // skip optional connect step on resume
+  return 6;
+}
+
 export default function Onboarding() {
   const { user, checkUserAuth } = useAuth();
   const { toast } = useToast();
@@ -36,8 +50,18 @@ export default function Onboarding() {
   const [accounts, setAccounts] = useState([{ platform: 'PlayStation', username: '' }]);
   const [profile, setProfile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   useEffect(() => {
+    // Hydrate any previously-saved selections so users resume where they left off.
+    if (user) {
+      setPlatforms(user.platforms_owned || []);
+      setGenres(user.favorite_genres || []);
+      setGames(user.favorite_games || []);
+      if (user.onboarding_started && !user.has_onboarded) {
+        setStep(computeResumeStep(user));
+      }
+    }
     trackJourney('onboarding_started');
     base44.auth.updateMe({ onboarding_started: true, signup_at: user?.signup_at || new Date().toISOString() }).catch(() => {});
   }, []);
@@ -53,6 +77,17 @@ export default function Onboarding() {
     !!profile,
     true,
   ][step];
+
+  // Persist partial progress so a returning user never loses their place.
+  const saveProgress = async () => {
+    try {
+      await base44.auth.updateMe({
+        platforms_owned: platforms,
+        favorite_genres: genres,
+        favorite_games: games,
+      });
+    } catch { /* ignore — progress is best-effort */ }
+  };
 
   const finish = async () => {
     setSaving(true);
@@ -80,7 +115,7 @@ export default function Onboarding() {
       } catch { /* ignore */ }
       await checkUserAuth();
       toast({ title: 'Welcome to NexusPlay! 🎮', description: 'Your gaming identity is ready.' });
-      navigate('/home');
+      setCelebrating(true);
     } catch (e) {
       toast({ title: 'Something went wrong', description: e.message, variant: 'destructive' });
     } finally {
@@ -128,9 +163,16 @@ export default function Onboarding() {
           <div className="flex gap-2 mt-6">
             {step > 0 && <Button variant="outline" onClick={() => setStep(step - 1)} className="rounded-full">Back</Button>}
             {step < STEP_META.length - 1 ? (
-              <Button onClick={() => setStep(step + 1)} disabled={!canProceed} className="flex-1 rounded-full">
-                Continue <ArrowRight className="w-4 h-4" />
-              </Button>
+              <>
+                {SKIPPABLE.has(step) && (
+                  <Button variant="ghost" onClick={() => { saveProgress(); setStep(step + 1); }} className="rounded-full text-muted-foreground">
+                    Skip
+                  </Button>
+                )}
+                <Button onClick={() => { saveProgress(); setStep(step + 1); }} disabled={!canProceed} className="flex-1 rounded-full">
+                  Continue <ArrowRight className="w-4 h-4" />
+                </Button>
+              </>
             ) : (
               <Button onClick={finish} disabled={saving} className="flex-1 rounded-full">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enter NexusPlay
@@ -139,6 +181,24 @@ export default function Onboarding() {
           </div>
         </div>
       </div>
+
+      {celebrating && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <div className="max-w-md w-full text-center rounded-3xl border border-primary/30 bg-card/80 backdrop-blur-md p-8 shadow-2xl animate-scale-in">
+            <div className="text-5xl mb-3">🎉</div>
+            <h2 className="text-2xl font-heading font-bold">Your gaming identity is complete.</h2>
+            <p className="text-sm text-muted-foreground mt-2">You've unlocked your profile badge, XP, and personalized recommendations. Your gaming journey starts now.</p>
+            <div className="grid grid-cols-3 gap-2 mt-5 text-xs">
+              <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">🏆</div>Profile badge</div>
+              <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">⚡</div>XP earned</div>
+              <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">🤝</div>Gamers to meet</div>
+            </div>
+            <Button onClick={() => navigate('/home')} size="lg" className="w-full mt-6 rounded-full">
+              <Check className="w-4 h-4" /> Enter NexusPlay
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import GameCard from '@/components/shared/GameCard';
 import HomeDashboard from '@/components/home/HomeDashboard';
 import WelcomeBanner from '@/components/onboarding/WelcomeBanner';
 import NewUserChecklist from '@/components/onboarding/NewUserChecklist';
+import OnboardingResumeBanner from '@/components/onboarding/OnboardingResumeBanner';
 import SmartRecommendations from '@/components/onboarding/SmartRecommendations';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
@@ -85,6 +86,7 @@ export default function Home() {
 
         {view === 'dashboard' ? (
           <div className="space-y-5 animate-fade-in">
+            {user?.onboarding_started && !user?.has_onboarded && <OnboardingResumeBanner user={user} />}
             {!user?.has_seen_welcome && <WelcomeBanner user={user} onSeen={checkUserAuth} />}
             <NewUserChecklist />
             <SmartRecommendations user={user} />

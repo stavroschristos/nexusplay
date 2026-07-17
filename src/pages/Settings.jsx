@@ -23,6 +23,7 @@ import InviteSection from '@/components/settings/InviteSection';
 import { createNotification } from '@/lib/notifications';
 import { computeProfileCompletion, markActivatedIfNeeded, trackJourney } from '@/lib/journey';
 import PageHeader from '@/components/shared/PageHeader';
+import OnboardingResumeBanner from '@/components/onboarding/OnboardingResumeBanner';
 import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon } from 'lucide-react';
 
 const platforms = ['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net'];
@@ -193,6 +194,8 @@ export default function Settings() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-8 pb-12 animate-fade-in">
       <PageHeader icon={SettingsIcon} title="Settings" subtitle="Manage your profile, accounts, and gaming identity" />
+
+      {user?.onboarding_started && !user?.has_onboarded && <OnboardingResumeBanner user={user} />}
 
       <AccountSection />
 
