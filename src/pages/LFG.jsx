@@ -10,6 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
 import { PlatformIcon } from '@/components/profile/GameAccountBadge';
 import { Loader2, Gamepad2, Plus, X, Users, Globe, Mic, MicOff } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonCard } from '@/components/shared/Skeleton';
 import { cn } from '@/lib/utils';
 
 const platforms = ['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net', 'Cross-platform'];
@@ -61,17 +64,13 @@ export default function LFG() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Users className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold font-heading">Looking For Group</h1>
-        </div>
+    <div className="max-w-2xl mx-auto px-4 py-6 animate-fade-in">
+      <PageHeader icon={Users} title="Looking For Group" subtitle="Find players for your next gaming session">
         <Button variant="outline" size="sm" onClick={() => setShowForm(!showForm)} className="rounded-full">
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showForm ? 'Cancel' : 'Post'}
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-5 space-y-3 mb-6">
@@ -131,11 +130,13 @@ export default function LFG() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-      ) : posts.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8 text-sm">No LFG posts yet. Create one to find players!</p>
-      ) : (
         <div className="space-y-3">
+          {[...Array(3)].map((_, i) => <SkeletonCard key={i} className="h-36" />)}
+        </div>
+      ) : posts.length === 0 ? (
+        <EmptyState icon={Users} title="No LFG posts yet" description="Create one to find players for your next session!" />
+      ) : (
+        <div className="space-y-3 stagger">
           {posts.map((p) => {
             const author = authors[p.created_by_id];
             const initials = (author?.display_name || author?.full_name || 'G').charAt(0).toUpperCase();

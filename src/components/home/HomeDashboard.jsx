@@ -38,16 +38,22 @@ export default function HomeDashboard({ onRefresh }) {
     }).finally(() => setLoading(false));
   }, [user]);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+  if (loading) {
+    return (
+      <div className="space-y-4 animate-fade-in">
+        {[...Array(4)].map((_, i) => <div key={i} className="skeleton rounded-2xl h-28" />)}
+      </div>
+    );
+  }
   if (!data) return null;
 
   const statusColors = { online: 'bg-emerald-500', playing: 'bg-blue-500', lfg: 'bg-amber-500', streaming: 'bg-rose-500', offline: 'bg-muted-foreground' };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-fade-in">
       <div>
-        <h2 className="text-lg font-bold font-heading mb-3 flex items-center gap-2"><Sparkles className="w-5 h-5 text-primary" /> Your Gaming Universe</h2>
-        <p className="text-sm text-muted-foreground -mt-2 mb-4">What's happening in your gaming world right now.</p>
+        <h2 className="text-lg font-bold font-heading mb-1 flex items-center gap-2"><Sparkles className="w-5 h-5 text-primary" /> Your Gaming Universe</h2>
+        <p className="text-sm text-muted-foreground mb-4">What's happening in your gaming world right now.</p>
       </div>
 
       {data.friendPresence.length > 0 && (

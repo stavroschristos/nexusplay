@@ -18,6 +18,8 @@ import TopListCard from '@/components/profile/TopListCard';
 import GamingSetupShowcase from '@/components/profile/GamingSetupShowcase';
 import FavoriteGamesShowcase from '@/components/profile/FavoriteGamesShowcase';
 import { getTheme } from '@/components/profile/themeConfig';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonCard } from '@/components/shared/Skeleton';
 import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap, Clock, Share2, ListOrdered, Monitor, Sparkles } from 'lucide-react';
 import ShareCard from '@/components/share/ShareCard';
 
@@ -108,15 +110,31 @@ export default function Profile() {
     } catch { setStartingChat(false); }
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
-
-  if (!profileUser) {
+  if (loading) {
     return (
-      <div className="text-center py-20">
-        <p className="text-muted-foreground">User not found.</p>
-        <Link to="/" className="text-primary hover:underline text-sm mt-2 inline-block">Back to feed</Link>
+      <div className="max-w-3xl mx-auto pb-12">
+        <div className="h-40 md:h-56 skeleton rounded-none" />
+        <div className="px-4 -mt-10 relative">
+          <div className="w-24 h-24 md:w-28 md:h-28 skeleton rounded-full ring-4 ring-background" />
+          <div className="mt-4 space-y-3">
+            <div className="skeleton rounded-lg h-6 w-48" />
+            <div className="skeleton rounded-lg h-4 w-72" />
+            <div className="flex gap-5 mt-3">
+              <div className="skeleton rounded h-5 w-16" />
+              <div className="skeleton rounded h-5 w-20" />
+              <div className="skeleton rounded h-5 w-20" />
+            </div>
+          </div>
+        </div>
+        <div className="px-4 mt-6 space-y-3">
+          {[...Array(3)].map((_, i) => <SkeletonCard key={i} className="h-28" />)}
+        </div>
       </div>
     );
+  }
+
+  if (!profileUser) {
+    return <EmptyState icon={Trophy} title="User not found" description="This profile doesn't exist or has been removed." action={<Link to="/" className="text-primary hover:underline text-sm">Back to feed</Link>} />;
   }
 
   const isOwn = profileId === currentUser?.id;
@@ -138,7 +156,7 @@ export default function Profile() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto pb-12">
+    <div className="max-w-3xl mx-auto pb-12 animate-fade-in">
       <div className={`h-40 md:h-56 relative overflow-hidden theme-anim ${theme.animated}`}>
         {profileUser.banner_url ? (
           <img src={profileUser.banner_url} alt="" className="w-full h-full object-cover" />
@@ -229,50 +247,52 @@ export default function Profile() {
         <IdentityCard user={profileUser} isOwn={isOwn} onUpdate={setProfileUser} />
       </div>
 
-      <div className="flex gap-1 px-4 mt-6 border-b border-border overflow-x-auto scrollbar-thin">
+      <div className="flex gap-1 px-4 mt-6 border-b border-border overflow-x-auto scrollbar-thin" role="tablist">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
+            role="tab"
+            aria-selected={tab === t.key}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
               tab === t.key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             <t.icon className="w-4 h-4" />
             {t.label}
-            {t.count !== null && t.count > 0 && <span className="text-xs text-muted-foreground">{t.count}</span>}
+            {t.count !== null && t.count > 0 && <span className="text-xs text-muted-foreground ml-0.5">{t.count}</span>}
           </button>
         ))}
       </div>
 
-      <div className="px-4 py-6">
+      <div className="px-4 py-6 animate-fade-in" key={tab}>
         {tab === 'posts' && (
-          posts.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No posts yet.</p> : (
-            <div className="space-y-4">{posts.map((p) => <PostCard key={p.id} post={p} author={profileUser} />)}</div>
+          posts.length === 0 ? <EmptyState icon={MessageSquare} title="No posts yet" description={isOwn ? "Share your first post to get started!" : "This gamer hasn't posted yet."} /> : (
+            <div className="space-y-4 stagger">{posts.map((p) => <PostCard key={p.id} post={p} author={profileUser} />)}</div>
           )
         )}
         {tab === 'favorites' && <FavoriteGamesShowcase favoriteGames={profileUser.favorite_games} games={games} />}
         {tab === 'showcase' && <AchievementShowcase achievements={achievements} isOwn={isOwn} />}
         {tab === 'toplists' && (
-          topLists.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No top lists yet.</p> : (
-            <div className="grid sm:grid-cols-2 gap-4">{topLists.map((l) => <TopListCard key={l.id} list={l} />)}</div>
+          topLists.length === 0 ? <EmptyState icon={ListOrdered} title="No top lists yet" description={isOwn ? "Create ranked lists of your favorite games to showcase your taste." : undefined} /> : (
+            <div className="grid sm:grid-cols-2 gap-4 stagger">{topLists.map((l) => <TopListCard key={l.id} list={l} />)}</div>
           )
         )}
         {tab === 'setup' && <GamingSetupShowcase setups={setups} />}
         {tab === 'stats' && <GamingStats user={profileUser} achievements={achievements} />}
         {tab === 'collections' && (
-          collections.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No collections yet.</p> : (
-            <div className="grid sm:grid-cols-2 gap-4">{collections.map((c) => <CollectionCard key={c.id} collection={c} />)}</div>
+          collections.length === 0 ? <EmptyState icon={Layers} title="No collections yet" description={isOwn ? "Group your favorite games into shareable collections." : undefined} /> : (
+            <div className="grid sm:grid-cols-2 gap-4 stagger">{collections.map((c) => <CollectionCard key={c.id} collection={c} />)}</div>
           )
         )}
         {tab === 'reviews' && (
-          reviews.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No reviews yet.</p> : (
-            <div className="space-y-3">
+          reviews.length === 0 ? <EmptyState icon={Star} title="No reviews yet" description={isOwn ? "Review games you've played to share your thoughts." : undefined} /> : (
+            <div className="space-y-3 stagger">
               {reviews.map((r) => (
                 <div key={r.id} className="rounded-xl border border-border bg-card/50 p-4">
                   <div className="flex items-center justify-between">
                     <Link to={`/games/${r.game_id}`} className="font-semibold text-sm hover:text-primary">{r.game_title}</Link>
-                    <div className="flex">{[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-amber-400 fill-current' : 'text-muted-foreground/30'}`} />)}</div>
+                    <div className="flex" aria-label={`${r.rating} out of 5 stars`}>{[...Array(5)].map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-amber-400 fill-current' : 'text-muted-foreground/30'}`} />)}</div>
                   </div>
                   {r.content && <p className="text-sm text-muted-foreground mt-2">{r.content}</p>}
                 </div>
@@ -282,8 +302,8 @@ export default function Profile() {
         )}
         {tab === 'timeline' && <GamingTimeline milestones={milestones} />}
         {tab === 'memories' && (
-          memories.length === 0 ? <p className="text-center text-muted-foreground py-8 text-sm">No memories yet. Your gaming history will appear here automatically.</p> : (
-            <div className="space-y-3">
+          memories.length === 0 ? <EmptyState icon={Clock} title="No memories yet" description={isOwn ? "Your gaming history will appear here automatically as you play." : undefined} /> : (
+            <div className="space-y-3 stagger">
               {memories.map((m) => (
                 <div key={m.id} className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-4 flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">

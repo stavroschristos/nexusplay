@@ -41,15 +41,38 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground font-body antialiased;
     background-image: radial-gradient(circle at 15% 0%, hsl(271 60% 15% / 0.15), transparent 40%),
                       radial-gradient(circle at 85% 100%, hsl(200 70% 15% / 0.1), transparent 40%);
     background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Consistent focus-visible rings for keyboard navigation */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer utilities {
+  /* Theme background animations */
   @keyframes drift-nebula { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(4%, -3%) scale(1.08); } }
   @keyframes drift-aurora { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-3%, 4%) rotate(2deg); } }
   @keyframes drift-sunset { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(3%, 3%) scale(1.1); } }
@@ -68,6 +91,45 @@
   .theme-ember .theme-anim { animation: drift-ember 15s ease-in-out infinite; }
   .theme-void .theme-anim { animation: drift-void 22s ease-in-out infinite; }
 
+  /* Entrance animations */
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slide-in-right { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+  .animate-fade-in { animation: fade-in 0.4s ease-out both; }
+  .animate-slide-up { animation: slide-up 0.4s ease-out both; }
+  .animate-slide-in-right { animation: slide-in-right 0.3s ease-out both; }
+  .animate-scale-in { animation: scale-in 0.25s ease-out both; }
+
+  /* Staggered children entrance */
+  .stagger > * { animation: slide-up 0.4s ease-out both; }
+  .stagger > *:nth-child(1) { animation-delay: 0.02s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.06s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.1s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.14s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.18s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.22s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.26s; }
+  .stagger > *:nth-child(8) { animation-delay: 0.3s; }
+
+  /* Shimmer skeleton */
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: hsl(250 12% 14%);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, hsl(250 10% 20% / 0.6), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Glassmorphism + glow */
   .glass {
     background: hsl(250 14% 10% / 0.7);
     backdrop-filter: blur(12px);
@@ -78,14 +140,21 @@
   .text-glow {
     text-shadow: 0 0 12px hsl(271 81% 56% / 0.4);
   }
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(250 12% 22%);
-    border-radius: 3px;
+
+  /* Scrollbar */
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(250 12% 22%); border-radius: 3px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: hsl(250 12% 28%); }
+
+  /* Mobile safe area */
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* Line clamp helpers */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

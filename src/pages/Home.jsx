@@ -6,7 +6,10 @@ import PostComposer from '@/components/feed/PostComposer';
 import PostCard from '@/components/feed/PostCard';
 import GameCard from '@/components/shared/GameCard';
 import HomeDashboard from '@/components/home/HomeDashboard';
-import { Loader2, Sparkles, TrendingUp, Flame, Users, LayoutDashboard } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonFeed } from '@/components/shared/Skeleton';
+import { Sparkles, TrendingUp, Flame, Users, LayoutDashboard, MessageSquare, Compass, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
@@ -52,67 +55,65 @@ export default function Home() {
   const handlePosted = (post) => setPosts((p) => [post, ...p]);
   const handleDeleted = (id) => setPosts((p) => p.filter((post) => post.id !== id));
 
+  const sidebarLinks = [
+    { to: '/explore', icon: Users, label: 'Find gamers' },
+    { to: '/communities', icon: Users, label: 'Join communities' },
+    { to: '/lfg', icon: Target, label: 'Looking for group' },
+    { to: '/wrapped', icon: Flame, label: 'Gaming Wrapped' },
+  ];
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[1fr_300px] gap-6">
       <div className="max-w-2xl w-full mx-auto lg:mx-0">
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold font-heading">Gamer Feed</h1>
-        </div>
+        <PageHeader icon={Sparkles} title={user?.display_name ? `Hey, ${user.display_name.split(' ')[0]}` : 'Gamer Feed'} subtitle={view === 'dashboard' ? 'Your gaming world at a glance' : 'Latest activity from your network'} />
 
         <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
           <button onClick={() => setView('dashboard')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5', view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </button>
-          <button onClick={() => setView('feed')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all', view === 'feed' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
-            Feed
+          <button onClick={() => setView('feed')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5', view === 'feed' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
+            <MessageSquare className="w-4 h-4" /> Feed
           </button>
         </div>
 
         {view === 'dashboard' ? (
           <HomeDashboard />
         ) : (
-          <>
-        <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
-          {[
-            { key: 'all', label: 'All' },
-            { key: 'activities', label: 'Activity' },
-          ].map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFeedFilter(f.key)}
-              className={cn(
-                'flex-1 py-2 rounded-lg text-sm font-medium transition-all',
-                feedFilter === f.key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="mb-6">
-          <PostComposer user={user} onPosted={handlePosted} />
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-primary" />
+          <div className="animate-fade-in">
+            <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'activities', label: 'Activity' },
+              ].map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setFeedFilter(f.key)}
+                  className={cn(
+                    'flex-1 py-2 rounded-lg text-sm font-medium transition-all',
+                    feedFilter === f.key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
-            <h3 className="font-semibold text-lg">No posts yet</h3>
-            <p className="text-sm text-muted-foreground mt-1">Be the first to share something!</p>
+
+            <div className="mb-6">
+              <PostComposer user={user} onPosted={handlePosted} />
+            </div>
+
+            {loading ? (
+              <SkeletonFeed />
+            ) : posts.length === 0 ? (
+              <EmptyState icon={Sparkles} title="No posts yet" description="Be the first to share something with the community!" />
+            ) : (
+              <div className="space-y-4 stagger">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} author={authors[post.created_by_id]} onDeleted={handleDeleted} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} author={authors[post.created_by_id]} onDeleted={handleDeleted} />
-            ))}
-          </div>
-        )}
-          </>
         )}
       </div>
 
@@ -124,7 +125,9 @@ export default function Home() {
             <h3 className="font-semibold text-sm">Trending Games</h3>
           </div>
           {trendingGames.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No games yet.</p>
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => <div key={i} className="skeleton rounded-lg h-16" />)}
+            </div>
           ) : (
             <div className="flex gap-3 overflow-x-auto scrollbar-thin pb-2">
               {trendingGames.map((g) => <GameCard key={g.id} game={g} size="sm" />)}
@@ -135,21 +138,16 @@ export default function Home() {
 
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-4">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-5 h-5 text-primary" />
+            <Compass className="w-5 h-5 text-primary" />
             <h3 className="font-semibold text-sm">Discover</h3>
           </div>
-          <Link to="/explore" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground py-1.5">
-            <Users className="w-4 h-4" /> Find gamers
-          </Link>
-          <Link to="/communities" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground py-1.5">
-            <Users className="w-4 h-4" /> Join communities
-          </Link>
-          <Link to="/lfg" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground py-1.5">
-            <Users className="w-4 h-4" /> Looking for group
-          </Link>
-          <Link to="/wrapped" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground py-1.5">
-            <Flame className="w-4 h-4" /> Gaming Wrapped
-          </Link>
+          <div className="space-y-1">
+            {sidebarLinks.map((l) => (
+              <Link key={l.to} to={l.to} className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg py-2 px-2 transition-colors">
+                <l.icon className="w-4 h-4" /> {l.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </aside>
     </div>

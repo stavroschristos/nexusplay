@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Bell, Heart, MessageCircle, UserPlus, Repeat2, Trophy, Check } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonList } from '@/components/shared/Skeleton';
+import { Bell, Heart, MessageCircle, UserPlus, Repeat2, Trophy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const typeConfig = {
@@ -35,15 +38,13 @@ export default function Notifications() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Bell className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold font-heading">Notifications</h1>
-        </div>
-        <button onClick={markAllRead} className="text-xs text-primary hover:underline flex items-center gap-1">
-          <Check className="w-3.5 h-3.5" /> Mark all read
-        </button>
-      </div>
+      <PageHeader icon={Bell} title="Notifications" subtitle="Stay on top of your gaming social activity">
+        {notifications.some((n) => !n.read) && (
+          <button onClick={markAllRead} className="text-xs text-primary hover:underline flex items-center gap-1">
+            <Check className="w-3.5 h-3.5" /> Mark all read
+          </button>
+        )}
+      </PageHeader>
 
       <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
         {['all', 'unread'].map((f) => (
@@ -52,14 +53,11 @@ export default function Notifications() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+        <SkeletonList count={5} />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3"><Bell className="w-7 h-7 text-primary" /></div>
-          <p className="text-sm text-muted-foreground">No notifications.</p>
-        </div>
+        <EmptyState icon={Bell} title="All caught up" description="You have no notifications right now." />
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 stagger">
           {filtered.map((n) => {
             const config = typeConfig[n.type] || typeConfig.system;
             const Icon = config.icon;

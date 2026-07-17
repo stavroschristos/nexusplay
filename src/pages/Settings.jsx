@@ -16,7 +16,8 @@ import CustomizeSection from '@/components/settings/CustomizeSection';
 import TopListsSection from '@/components/settings/TopListsSection';
 import GamingSetupSection from '@/components/settings/GamingSetupSection';
 import MemoriesSection from '@/components/settings/MemoriesSection';
-import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, ListOrdered, Camera } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon } from 'lucide-react';
 
 const platforms = ['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net'];
 const allGenres = ['RPG', 'Action', 'Adventure', 'Shooter', 'Strategy', 'Horror', 'Racing', 'Sports', 'Fighting', 'Puzzle', 'Sandbox', 'MMO', 'Roguelike', 'Indie'];
@@ -147,8 +148,8 @@ export default function Settings() {
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-8 pb-12">
-      <h1 className="text-2xl font-bold font-heading">Settings</h1>
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-8 pb-12 animate-fade-in">
+      <PageHeader icon={SettingsIcon} title="Settings" subtitle="Manage your profile, accounts, and gaming identity" />
 
       {/* Activity Logging */}
       <ActivitySection onLogged={() => toast({ title: 'Activity shared!' })} />

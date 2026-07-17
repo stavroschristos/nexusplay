@@ -8,6 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Users, Plus, X, Hash } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonCard } from '@/components/shared/Skeleton';
 import { cn } from '@/lib/utils';
 
 const categories = ['Game', 'Genre', 'Console', 'Achievement Hunting', 'Speedrunning', 'Competitive', 'Retro', 'Indie', 'Other'];
@@ -77,16 +80,12 @@ export default function Communities() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Users className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold font-heading">Communities</h1>
-        </div>
+      <PageHeader icon={Users} title="Communities" subtitle="Find your people and join the conversation">
         <Button variant="outline" size="sm" onClick={() => setShowForm(!showForm)} className="rounded-full">
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showForm ? 'Cancel' : 'Create'}
         </Button>
-      </div>
+      </PageHeader>
 
       {showForm && (
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-5 space-y-3 mb-6">
@@ -127,11 +126,13 @@ export default function Communities() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8 text-sm">No communities found. Create one!</p>
-      ) : (
         <div className="grid sm:grid-cols-2 gap-4">
+          {[...Array(4)].map((_, i) => <SkeletonCard key={i} className="h-44" />)}
+        </div>
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={Users} title="No communities found" description="Be the first to create one for your favorite game or genre!" />
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-4 stagger">
           {filtered.map((c) => {
             const joined = joinedIds.has(c.id);
             return (

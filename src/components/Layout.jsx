@@ -7,25 +7,36 @@ import { trackPageView } from '@/lib/analytics';
 import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { icon: Home, label: 'Home', path: '/' },
-  { icon: Radio, label: 'Gaming Radar', path: '/radar' },
-  { icon: Compass, label: 'Discover', path: '/explore' },
-  { icon: Users, label: 'Communities', path: '/communities' },
-  { icon: Gamepad, label: 'Games', path: '/games' },
-  { icon: Target, label: 'Challenges', path: '/challenges' },
-  { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
-  { icon: MessagesSquare, label: 'Messages', path: '/messages' },
-  { icon: Flame, label: 'Wrapped', path: '/wrapped' },
-  { icon: Trophy, label: 'My Profile', path: '/profile' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
+const navGroups = [
+  {
+    items: [
+      { icon: Home, label: 'Home', path: '/' },
+      { icon: Radio, label: 'Gaming Radar', path: '/radar' },
+      { icon: Compass, label: 'Discover', path: '/explore' },
+    ],
+  },
+  {
+    items: [
+      { icon: Users, label: 'Communities', path: '/communities' },
+      { icon: Gamepad, label: 'Games', path: '/games' },
+      { icon: Target, label: 'Challenges', path: '/challenges' },
+    ],
+  },
+  {
+    items: [
+      { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
+      { icon: MessagesSquare, label: 'Messages', path: '/messages' },
+      { icon: Flame, label: 'Wrapped', path: '/wrapped' },
+      { icon: Trophy, label: 'My Profile', path: '/profile' },
+    ],
+  },
 ];
 
 const mobileNavItems = [
   { icon: Home, label: 'Home', path: '/' },
-  { icon: Radio, label: 'Radar', path: '/radar' },
-  { icon: Target, label: 'Challenges', path: '/challenges' },
+  { icon: Compass, label: 'Discover', path: '/explore' },
   { icon: Trophy, label: 'Profile', path: '/profile' },
+  { icon: MessagesSquare, label: 'Messages', path: '/messages' },
   { icon: Bell, label: 'Alerts', path: '/notifications' },
 ];
 
@@ -57,7 +68,9 @@ export default function Layout() {
   }, []);
 
   const isAdmin = user?.role === 'admin';
-  const allNavItems = isAdmin ? [...navItems, { icon: ShieldAlert, label: 'Admin', path: '/admin' }] : navItems;
+  const allGroups = isAdmin
+    ? [...navGroups, { items: [{ icon: ShieldAlert, label: 'Admin', path: '/admin' }] }]
+    : navGroups;
   const initials = (user?.display_name || user?.full_name || user?.email || 'G').charAt(0).toUpperCase();
 
   const ANNOUNCEMENT_STYLES = {
@@ -73,16 +86,19 @@ export default function Layout() {
       <Link
         to={item.path}
         className={cn(
-          mobile ? 'flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg transition-colors relative' : 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
+          mobile
+            ? 'flex flex-col items-center gap-1 px-2 py-1.5 rounded-lg transition-colors relative flex-1 min-w-0'
+            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
           active
             ? (mobile ? 'text-primary' : 'bg-primary text-primary-foreground glow')
             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
         )}
+        aria-current={active ? 'page' : undefined}
       >
         <item.icon className={mobile ? 'w-5 h-5' : 'w-5 h-5'} />
-        {mobile ? <span className="text-[10px] font-medium">{item.label}</span> : item.label}
+        {mobile ? <span className="text-[10px] font-medium truncate">{item.label}</span> : item.label}
         {item.path === '/notifications' && unreadCount > 0 && (
-          <span className="absolute top-1 right-2 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>
+          <span className="absolute top-1 right-2 min-w-4 h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>
         )}
       </Link>
     );
@@ -91,17 +107,22 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex">
       <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 glass border-r border-border z-40">
-        <div className="flex items-center gap-2 px-6 py-6">
+        <div className="flex items-center gap-2.5 px-6 py-6">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow">
             <Gamepad2 className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="font-heading font-bold text-xl tracking-tight">NEXUS</span>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
-          {allNavItems.map((item) => <NavLink key={item.path} item={item} />)}
-          <div className="px-3 py-2 mt-2">
+        <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto scrollbar-thin">
+          {allGroups.map((group, gi) => (
+            <div key={gi} className="space-y-0.5">
+              {group.items.map((item) => <NavLink key={item.path} item={item} />)}
+            </div>
+          ))}
+          <div className="space-y-0.5 pt-2 border-t border-border/50">
             <NavLink item={{ icon: Bell, label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}`, path: '/notifications' }} />
+            <NavLink item={{ icon: Settings, label: 'Settings', path: '/settings' }} />
           </div>
         </nav>
 
@@ -122,21 +143,21 @@ export default function Layout() {
         </div>
       </aside>
 
-      <nav className="md:hidden fixed bottom-0 inset-x-0 glass border-t border-border z-40">
-        <div className="flex items-center justify-around px-2 py-2">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 glass border-t border-border z-40 safe-bottom">
+        <div className="flex items-center justify-around px-1 py-2">
           {mobileNavItems.map((item) => <NavLink key={item.path} item={item} mobile />)}
         </div>
       </nav>
 
       <main className="flex-1 md:ml-64 pb-20 md:pb-0">
         {announcement && !announcementDismissed && (
-          <div className={`mx-4 mt-4 p-3 rounded-xl border flex items-start gap-3 ${ANNOUNCEMENT_STYLES[announcement.type] || ANNOUNCEMENT_STYLES.info}`}>
+          <div className={`mx-4 mt-4 p-3 rounded-xl border flex items-start gap-3 animate-slide-up ${ANNOUNCEMENT_STYLES[announcement.type] || ANNOUNCEMENT_STYLES.info}`}>
             <Megaphone className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold">{announcement.title}</p>
               {announcement.body && <p className="text-xs opacity-90 mt-0.5">{announcement.body}</p>}
             </div>
-            <button onClick={() => setAnnouncementDismissed(true)} className="shrink-0 opacity-60 hover:opacity-100"><X className="w-4 h-4" /></button>
+            <button onClick={() => setAnnouncementDismissed(true)} className="shrink-0 opacity-60 hover:opacity-100 transition-opacity" aria-label="Dismiss announcement"><X className="w-4 h-4" /></button>
           </div>
         )}
         <Outlet />

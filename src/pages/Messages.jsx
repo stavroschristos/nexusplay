@@ -4,7 +4,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import ConversationList from '@/components/messages/ConversationList';
 import ChatWindow from '@/components/messages/ChatWindow';
-import { MessagesSquare } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { MessagesSquare, Loader2 } from 'lucide-react';
 
 export default function Messages() {
   const { user } = useAuth();
@@ -62,20 +64,21 @@ export default function Messages() {
 
   return (
     <div className="max-w-4xl mx-auto px-0 md:px-4 md:py-6">
-      <div className="flex items-center gap-2 px-4 md:px-0 mb-4 md:mb-6">
-        <MessagesSquare className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold font-heading">Messages</h1>
+      <div className="px-4 md:px-0">
+        <PageHeader icon={MessagesSquare} title="Messages" />
       </div>
 
       <div className="md:rounded-2xl md:border border-border bg-card/50 md:backdrop-blur-sm overflow-hidden h-[calc(100vh-12rem)] md:h-[calc(100vh-9rem)] flex">
         {/* Conversation List */}
         <div className={`w-full md:w-80 md:border-r border-border flex flex-col ${showChat ? 'hidden md:flex' : 'flex'}`}>
-          <div className="px-4 py-2 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          <div className="px-4 py-3 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Conversations
           </div>
           <div className="flex-1 overflow-y-auto scrollbar-thin">
             {loading ? (
-              <div className="flex justify-center py-12 text-muted-foreground text-sm">Loading...</div>
+              <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+            ) : conversations.length === 0 ? (
+              <EmptyState icon={MessagesSquare} title="No conversations yet" description="Start chatting from a gamer's profile!" />
             ) : (
               <ConversationList
                 conversations={conversations}

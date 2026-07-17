@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Loader2, Sparkles, TrendingUp, Trophy, Users, Heart, Target } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import { SkeletonCard } from '@/components/shared/Skeleton';
+import { Loader2, Sparkles, TrendingUp, Trophy, Users, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Assistant() {
@@ -59,7 +61,16 @@ Each array has 1-2 short, friendly, specific strings. Make them feel personal an
     }).finally(() => setLoading(false));
   }, [user]);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6 pb-12">
+        <PageHeader icon={Sparkles} title="AI Gaming Assistant" subtitle="Personalized intelligence based on your gaming history" />
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => <SkeletonCard key={i} className="h-32" />)}
+        </div>
+      </div>
+    );
+  }
 
   const sections = [
     { key: 'recommendations', title: 'Recommended For You', icon: Sparkles, color: 'text-primary' },
@@ -69,20 +80,16 @@ Each array has 1-2 short, friendly, specific strings. Make them feel personal an
   ];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-12">
-      <div className="flex items-center gap-2 mb-1">
-        <Sparkles className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold font-heading">AI Gaming Assistant</h1>
-      </div>
-      <p className="text-sm text-muted-foreground mb-6">Personalized intelligence based on your gaming history.</p>
+    <div className="max-w-2xl mx-auto px-4 py-6 pb-12 animate-fade-in">
+      <PageHeader icon={Sparkles} title="AI Gaming Assistant" subtitle="Personalized intelligence based on your gaming history" />
 
       {generating ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Analyzing your gaming history...</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 stagger">
           {sections.map((s) => (
             <div key={s.key} className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-5">
               <div className="flex items-center gap-2 mb-3">

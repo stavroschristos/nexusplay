@@ -126,7 +126,7 @@ export default function Onboarding() {
         <div className="rounded-3xl border border-border bg-card/50 backdrop-blur-sm p-6">
           <h2 className="text-xl font-bold font-heading mb-1">{steps[step].title}</h2>
           <p className="text-sm text-muted-foreground mb-5">{steps[step].desc}</p>
-          {steps[step].content}
+          <div key={step} className="animate-slide-up">{steps[step].content}</div>
           <div className="flex gap-2 mt-6">
             {step > 0 && <Button variant="outline" onClick={() => setStep(step - 1)} className="rounded-full">Back</Button>}
             {step < steps.length - 1 ? (

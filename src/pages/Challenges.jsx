@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
-import { Loader2, Target, CheckCircle2, Circle, Flame, Award, Zap } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonCard } from '@/components/shared/Skeleton';
+import { Target, CheckCircle2, Flame, Award, Zap } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const categoryColors = {
@@ -49,23 +51,25 @@ export default function Challenges() {
     if (done) toast({ title: `Challenge complete! +${challenge.xp_reward} XP`, description: challenge.badge_icon || '🏆' });
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6 pb-12">
+        <PageHeader icon={Target} title="Gaming Challenges" subtitle="Complete challenges to earn XP and badges" />
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => <SkeletonCard key={i} className="h-40" />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-12">
-      <div className="flex items-center gap-2 mb-1">
-        <Target className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold font-heading">Gaming Challenges</h1>
-      </div>
-      <p className="text-sm text-muted-foreground mb-6">Complete challenges to earn XP and badges.</p>
+    <div className="max-w-2xl mx-auto px-4 py-6 pb-12 animate-fade-in">
+      <PageHeader icon={Target} title="Gaming Challenges" subtitle="Complete challenges to earn XP and badges" />
 
       {challenges.length === 0 ? (
-        <div className="text-center py-16">
-          <Target className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-muted-foreground text-sm">No active challenges right now. Check back soon!</p>
-        </div>
+        <EmptyState icon={Target} title="No active challenges" description="Check back soon for new weekly and monthly challenges!" />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 stagger">
           {challenges.map((c) => {
             const uc = getProgress(c.id);
             const pct = uc ? Math.min(100, (uc.progress / c.target) * 100) : 0;

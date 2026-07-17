@@ -9,6 +9,9 @@ import { PlatformIcon } from '@/components/profile/GameAccountBadge';
 import GamerCard from '@/components/explore/GamerCard';
 import CommunityCard from '@/components/explore/CommunityCard';
 import TrendingGameCard from '@/components/explore/TrendingGameCard';
+import PageHeader from '@/components/shared/PageHeader';
+import EmptyState from '@/components/shared/EmptyState';
+import { SkeletonCardGrid, SkeletonList } from '@/components/shared/Skeleton';
 import {
   getCompatibilityBreakdown,
   sharedGamesCount,
@@ -16,8 +19,8 @@ import {
   achievementSimilarity,
 } from '@/lib/compatibility';
 import {
-  Loader2, Search, Users, UserPlus, UserCheck, Sparkles, TrendingUp, Trophy,
-  Gamepad2, Flame, Crown, Medal, Heart, Layers,
+  Search, Users, UserPlus, UserCheck, Sparkles, TrendingUp, Trophy,
+  Gamepad2, Flame, Crown, Heart, Layers,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -30,7 +33,7 @@ const TABS = [
   { key: 'creators', label: 'Rising Creators', icon: Heart },
   { key: 'communities', label: 'Communities', icon: Users },
   { key: 'games', label: 'Trending Games', icon: Flame },
-  { key: 'recent', label: 'New Gamers', icon: Medal },
+  { key: 'recent', label: 'New Gamers', icon: Crown },
 ];
 
 export default function Explore() {
@@ -67,7 +70,6 @@ export default function Explore() {
       setCommunities(comms || []);
       setGames(allGames || []);
 
-      // Aggregate review stats per game
       const rStats = {};
       (reviews || []).forEach((r) => {
         const gid = r.game_id;
@@ -77,7 +79,6 @@ export default function Explore() {
       });
       setReviewStats(rStats);
 
-      // Aggregate creator engagement per user
       const cStats = {};
       (posts || []).forEach((p) => {
         const uid = p.created_by_id;
@@ -110,7 +111,6 @@ export default function Explore() {
     setFollowingIds(newSet);
   };
 
-  // Compute breakdowns for all users
   const userData = useMemo(() => {
     return users.map((u) => {
       const breakdown = getCompatibilityBreakdown(currentUser, u);
@@ -152,21 +152,26 @@ export default function Explore() {
 
   const popularCommunities = [...(communities || [])].sort((a, b) => (b.members_count || 0) - (a.members_count || 0)).slice(0, 12);
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
+        <PageHeader icon={Sparkles} title="Discover Your People" subtitle="Find gamers who match your style, library, and vibe" />
+        <div className="h-10 skeleton rounded-full mb-4" />
+        <div className="flex gap-1.5 mb-6 overflow-hidden">
+          {[...Array(5)].map((_, i) => <div key={i} className="skeleton rounded-full h-9 w-24 shrink-0" />)}
+        </div>
+        <SkeletonCardGrid count={4} />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
-      <div className="flex items-center gap-2 mb-6">
-        <Sparkles className="w-6 h-6 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold font-heading">Discover Your People</h1>
-          <p className="text-xs text-muted-foreground">Find gamers who match your style, library, and vibe</p>
-        </div>
-      </div>
+      <PageHeader icon={Sparkles} title="Discover Your People" subtitle="Find gamers who match your style, library, and vibe" />
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search gamers..." className="pl-10 rounded-full bg-card/50" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search gamers..." className="pl-10 rounded-full bg-card/50" aria-label="Search gamers" />
       </div>
 
       <div className="flex gap-1.5 mb-6 overflow-x-auto scrollbar-thin pb-1">
@@ -184,31 +189,33 @@ export default function Explore() {
         ))}
       </div>
 
-      <TabContent
-        tab={tab}
-        recommended={filtered(recommended)}
-        sharedLib={filtered(sharedLib)}
-        habits={filtered(habits)}
-        achievers={filtered(achievers)}
-        trending={filtered(trending)}
-        risingCreators={filtered(risingCreators)}
-        recentlyJoined={filtered(recentlyJoined)}
-        popularCommunities={popularCommunities}
-        trendingGames={trendingGames}
-        accountsMap={accountsMap}
-        followingIds={followingIds}
-        onToggleFollow={toggleFollow}
-        creatorStats={creatorStats}
-      />
+      <div className="animate-fade-in">
+        <TabContent
+          tab={tab}
+          recommended={filtered(recommended)}
+          sharedLib={filtered(sharedLib)}
+          habits={filtered(habits)}
+          achievers={filtered(achievers)}
+          trending={filtered(trending)}
+          risingCreators={filtered(risingCreators)}
+          recentlyJoined={filtered(recentlyJoined)}
+          popularCommunities={popularCommunities}
+          trendingGames={trendingGames}
+          accountsMap={accountsMap}
+          followingIds={followingIds}
+          onToggleFollow={toggleFollow}
+          creatorStats={creatorStats}
+        />
+      </div>
     </div>
   );
 }
 
 function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, risingCreators, recentlyJoined, popularCommunities, trendingGames, accountsMap, followingIds, onToggleFollow, creatorStats }) {
   const renderGamerGrid = (list, showReasons = true) => {
-    if (list.length === 0) return <EmptyState text="No gamers found. Try updating your profile to get better matches!" />;
+    if (list.length === 0) return <EmptyState icon={Users} title="No gamers found" description="Try updating your profile to get better matches!" />;
     return (
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid sm:grid-cols-2 gap-3 stagger">
         {list.map((d) => (
           <GamerCard
             key={d.user.id}
@@ -237,7 +244,7 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={Gamepad2} title="Shared Libraries" subtitle="Gamers who play the same games as you" />
-        {sharedLib.length === 0 ? <EmptyState text="No gamers share your favorite games yet. Add more in profile settings!" /> : renderGamerGrid(sharedLib)}
+        {sharedLib.length === 0 ? <EmptyState icon={Gamepad2} title="No shared games yet" description="Add more favorite games in your profile settings to find matches!" /> : renderGamerGrid(sharedLib)}
       </div>
     );
   }
@@ -246,7 +253,7 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={Layers} title="Similar Gaming Habits" subtitle="Gamers who share your play style and habits" />
-        {habits.length === 0 ? <EmptyState text="No gamers share your gaming habits yet. Set your habits in profile settings!" /> : renderGamerGrid(habits)}
+        {habits.length === 0 ? <EmptyState icon={Layers} title="No habit matches yet" description="Set your gaming habits in profile settings to find like-minded gamers!" /> : renderGamerGrid(habits)}
       </div>
     );
   }
@@ -264,8 +271,8 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={TrendingUp} title="Trending Gamers" subtitle="Top gamers by achievement score" />
-        {trending.length === 0 ? <EmptyState text="No gamers found." /> : (
-          <div className="space-y-2">
+        {trending.length === 0 ? <EmptyState icon={TrendingUp} title="No gamers found" /> : (
+          <div className="space-y-2 stagger">
             {trending.map(({ user: u, breakdown }, idx) => (
               <TrendingGamerRow key={u.id} user={u} breakdown={breakdown} rank={idx} accounts={accountsMap[u.id] || []} isFollowing={followingIds.has(u.id)} onToggleFollow={onToggleFollow} />
             ))}
@@ -280,9 +287,9 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
       <div className="space-y-4">
         <SectionHeader icon={Heart} title="Rising Creators" subtitle="Gamers creating the most engaging content" />
         {risingCreators.length === 0 ? (
-          <EmptyState text="No creators yet. Be the first to share posts and activities!" />
+          <EmptyState icon={Heart} title="No creators yet" description="Be the first to share posts and activities!" />
         ) : (
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid sm:grid-cols-2 gap-3 stagger">
             {risingCreators.map((d) => {
               const stats = creatorStats[d.user.id] || {};
               return (
@@ -307,8 +314,8 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={Users} title="Popular Communities" subtitle="Active communities you can join" />
-        {popularCommunities.length === 0 ? <EmptyState text="No communities yet." /> : (
-          <div className="grid sm:grid-cols-2 gap-3">
+        {popularCommunities.length === 0 ? <EmptyState icon={Users} title="No communities yet" /> : (
+          <div className="grid sm:grid-cols-2 gap-3 stagger">
             {popularCommunities.map((c) => <CommunityCard key={c.id} community={c} />)}
           </div>
         )}
@@ -320,8 +327,8 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={Flame} title="Trending Games" subtitle="Most reviewed and talked-about games" />
-        {trendingGames.length === 0 ? <EmptyState text="No games in the database yet." /> : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {trendingGames.length === 0 ? <EmptyState icon={Flame} title="No games yet" description="Games will appear here once they're added to the database." /> : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 stagger">
             {trendingGames.map(({ game, reviewCount, avgRating }) => (
               <TrendingGameCard key={game.id} game={game} reviewCount={reviewCount} avgRating={avgRating} />
             ))}
@@ -334,7 +341,7 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
   if (tab === 'recent') {
     return (
       <div className="space-y-4">
-        <SectionHeader icon={Medal} title="Recently Joined" subtitle="Newest members of the community" />
+        <SectionHeader icon={Crown} title="Recently Joined" subtitle="Newest members of the community" />
         {renderGamerGrid(recentlyJoined, false)}
       </div>
     );
@@ -355,10 +362,6 @@ function SectionHeader({ icon: Icon, title, subtitle }) {
       </div>
     </div>
   );
-}
-
-function EmptyState({ text }) {
-  return <p className="text-center text-muted-foreground py-8 text-sm">{text}</p>;
 }
 
 function TrendingGamerRow({ user, breakdown, rank, accounts, isFollowing, onToggleFollow }) {
@@ -383,7 +386,7 @@ function TrendingGamerRow({ user, breakdown, rank, accounts, isFollowing, onTogg
         </div>
       </Link>
       {breakdown?.score > 0 && <span className="text-xs text-muted-foreground shrink-0">{breakdown.score}% match</span>}
-      <Button onClick={() => onToggleFollow(user.id)} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="rounded-full shrink-0">
+      <Button onClick={() => onToggleFollow(user.id)} variant={isFollowing ? 'secondary' : 'default'} size="sm" className="rounded-full shrink-0" aria-label={isFollowing ? 'Unfollow' : 'Follow'}>
         {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
       </Button>
     </div>
