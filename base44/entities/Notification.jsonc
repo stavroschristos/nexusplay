@@ -7,14 +7,43 @@
       "enum": [
         "like",
         "comment",
+        "reply",
         "follow",
         "repost",
         "reaction",
-        "achievement",
         "mention",
+        "achievement",
+        "trophy",
+        "milestone",
+        "challenge",
+        "friend_request",
+        "friend_accept",
+        "compatibility",
+        "community_invite",
+        "community_announcement",
+        "trending",
+        "message",
+        "featured",
+        "announcement",
         "system"
       ],
       "description": "Notification type"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "social",
+        "gaming",
+        "community",
+        "messaging",
+        "system"
+      ],
+      "default": "system",
+      "description": "Notification grouping for filters and preferences"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional short headline shown above the content"
     },
     "content": {
       "type": "string",
@@ -24,10 +53,23 @@
       "type": "string",
       "description": "Where to navigate when clicked"
     },
+    "icon": {
+      "type": "string",
+      "description": "Optional emoji or icon hint for the notification"
+    },
     "read": {
       "type": "boolean",
       "default": false,
       "description": "Whether notification has been read"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the notification was marked read"
+    },
+    "recipient_id": {
+      "type": "string",
+      "description": "The user this notification is for (owner of the notification)"
     },
     "actor_id": {
       "type": "string",
@@ -36,10 +78,59 @@
     "actor_name": {
       "type": "string",
       "description": "Actor display name (denormalized)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Extra structured context (post id, game title, score, etc.)"
+    },
+    "opened": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user opened/clicked the notification (engagement tracking)"
     }
   },
   "required": [
     "type",
-    "content"
-  ]
+    "content",
+    "recipient_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.recipient_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {},
+    "update": {
+      "$or": [
+        {
+          "data.recipient_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.recipient_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -23,6 +23,8 @@ import EmptyState from '@/components/shared/EmptyState';
 import { SkeletonCard } from '@/components/shared/Skeleton';
 import { Loader2, UserPlus, UserCheck, Trophy, Gamepad2, MessageSquare, Star, Layers, Award, Zap, Clock, Share2, ListOrdered, Monitor, Sparkles, Ban, ShieldAlert, Lock } from 'lucide-react';
 import ShareCard from '@/components/share/ShareCard';
+import NewUserChecklist from '@/components/onboarding/NewUserChecklist';
+import { createNotification } from '@/lib/notifications';
 import { canView, canMessage, displayName as publicName } from '@/lib/privacy';
 
 export default function Profile() {
@@ -100,9 +102,11 @@ export default function Profile() {
     } else {
       await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: profileId });
       setIsFollowing(true); setFollowers((f) => f + 1);
-      await base44.entities.Notification.create({
-        type: 'follow', content: `${currentUser?.display_name || 'Someone'} started following you`, link: `/profile/${currentUser?.id}`,
-        actor_id: currentUser?.id, actor_name: currentUser?.display_name || currentUser?.full_name,
+      await createNotification({
+        recipientId: profileId, type: 'follow',
+        content: `${currentUser?.display_name || 'Someone'} started following you`,
+        link: `/profile/${currentUser?.id}`, icon: '🤝',
+        actorId: currentUser?.id, actorName: currentUser?.display_name || currentUser?.full_name,
       });
     }
   };
@@ -167,6 +171,14 @@ export default function Profile() {
     return <EmptyState icon={Trophy} title="User not found" description="This profile doesn't exist or has been removed." action={<Link to="/" className="text-primary hover:underline text-sm">Back to feed</Link>} />;
   }
 
+  const isOwn = profileId === currentUser?.id;
+  const isFriend = isFollowing && ownerFollowsViewer;
+  const viewer = { id: currentUser?.id, isFriend, isAdmin: currentUser?.role === 'admin' };
+  const initials = (profileUser.display_name || profileUser.full_name || 'G').charAt(0).toUpperCase();
+  const compatibility = isOwn ? 0 : calculateCompatibility(currentUser, profileUser);
+  const theme = getTheme(profileUser.profile_theme);
+  const profileVisible = isOwn || viewer.isAdmin || canView(profileUser, 'privacy_profile', viewer);
+
   if (!profileVisible) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center animate-fade-in">
@@ -183,14 +195,6 @@ export default function Profile() {
       </div>
     );
   }
-
-  const isOwn = profileId === currentUser?.id;
-  const isFriend = isFollowing && ownerFollowsViewer;
-  const viewer = { id: currentUser?.id, isFriend, isAdmin: currentUser?.role === 'admin' };
-  const initials = (profileUser.display_name || profileUser.full_name || 'G').charAt(0).toUpperCase();
-  const compatibility = isOwn ? 0 : calculateCompatibility(currentUser, profileUser);
-  const theme = getTheme(profileUser.profile_theme);
-  const profileVisible = isOwn || viewer.isAdmin || canView(profileUser, 'privacy_profile', viewer);
 
   const tabs = [
     { key: 'posts', label: 'Posts', icon: MessageSquare, count: posts.length, gate: 'privacy_activity' },
@@ -312,6 +316,12 @@ export default function Profile() {
       <div className="px-4 mt-5">
         <IdentityCard user={profileUser} isOwn={isOwn} onUpdate={setProfileUser} />
       </div>
+
+      {isOwn && (
+        <div className="px-4 mt-5">
+          <NewUserChecklist variant="profile" />
+        </div>
+      )}
 
       <div className="flex gap-1 px-4 mt-6 border-b border-border overflow-x-auto scrollbar-thin" role="tablist">
         {tabs.map((t) => (

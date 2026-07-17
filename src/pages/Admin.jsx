@@ -10,6 +10,8 @@ import AdminFeatures from '@/components/admin/AdminFeatures';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminRegistration from '@/components/admin/AdminRegistration';
 import AdminFeedback from '@/components/admin/AdminFeedback';
+import AdminNotifications from '@/components/admin/AdminNotifications';
+import { Bell } from 'lucide-react';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -17,6 +19,7 @@ const TABS = [
   { key: 'moderation', label: 'Moderation', icon: Flag },
   { key: 'registration', label: 'Registration', icon: UserCheck },
   { key: 'feedback', label: 'Feedback', icon: MessageSquare },
+  { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'features', label: 'Features', icon: BarChart3 },
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
@@ -72,6 +75,7 @@ export default function Admin() {
       {tab === 'features' && <AdminFeatures />}
       {tab === 'registration' && <AdminRegistration />}
       {tab === 'feedback' && <AdminFeedback />}
+      {tab === 'notifications' && <AdminNotifications />}
       {tab === 'settings' && <AdminSettings />}
     </div>
   );

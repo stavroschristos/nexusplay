@@ -54,10 +54,9 @@ export default function Layout() {
   }, [location.pathname]);
 
   useEffect(() => {
-    base44.entities.Notification.filter({ read: false }).then((res) => setUnreadCount(res.length)).catch(() => {});
-    const unsubscribe = base44.entities.Notification.subscribe(() => {
-      base44.entities.Notification.filter({ read: false }).then((res) => setUnreadCount(res.length)).catch(() => {});
-    });
+    const fetchUnread = () => base44.entities.Notification.filter({ recipient_id: user?.id, read: false }).then((res) => setUnreadCount(res.length)).catch(() => {});
+    fetchUnread();
+    const unsubscribe = base44.entities.Notification.subscribe(fetchUnread);
     return unsubscribe;
   }, []);
 

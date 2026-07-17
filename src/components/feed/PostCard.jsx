@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import ReactionBar from '@/components/shared/ReactionBar';
+import { createNotification } from '@/lib/notifications';
 import { cn } from '@/lib/utils';
 
 const activityConfig = {
@@ -57,9 +58,11 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
       setLikeId(like.id);
       await base44.entities.Post.update(post.id, { likes_count: likes + 1 });
       if (post.created_by_id !== user?.id) {
-        await base44.entities.Notification.create({
-          type: 'like', content: `${user?.display_name || 'Someone'} liked your post`, link: '/',
-          actor_id: user?.id, actor_name: user?.display_name || user?.full_name,
+        await createNotification({
+          recipientId: post.created_by_id, type: 'like',
+          content: `${user?.display_name || 'Someone'} liked your post`, link: '/home',
+          actorId: user?.id, actorName: user?.display_name || user?.full_name,
+          metadata: { post_id: post.id },
         });
       }
     }
@@ -89,9 +92,11 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
       setCommentText('');
       await base44.entities.Post.update(post.id, { comments_count: (post.comments_count || 0) + 1 });
       if (post.created_by_id !== user?.id) {
-        await base44.entities.Notification.create({
-          type: 'comment', content: `${user?.display_name || 'Someone'} commented on your post`, link: '/',
-          actor_id: user?.id, actor_name: user?.display_name || user?.full_name,
+        await createNotification({
+          recipientId: post.created_by_id, type: 'comment',
+          content: `${user?.display_name || 'Someone'} commented on your post`, link: '/home',
+          actorId: user?.id, actorName: user?.display_name || user?.full_name,
+          metadata: { post_id: post.id },
         });
       }
     } catch {
@@ -114,9 +119,11 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
       });
       await base44.entities.Post.update(post.id, { reposts_count: (post.reposts_count || 0) + 1 });
       if (post.created_by_id !== user?.id) {
-        await base44.entities.Notification.create({
-          type: 'repost', content: `${user?.display_name || 'Someone'} reposted your post`, link: '/',
-          actor_id: user?.id, actor_name: user?.display_name || user?.full_name,
+        await createNotification({
+          recipientId: post.created_by_id, type: 'repost',
+          content: `${user?.display_name || 'Someone'} reposted your post`, link: '/home',
+          actorId: user?.id, actorName: user?.display_name || user?.full_name,
+          metadata: { post_id: post.id },
         });
       }
       toast({ title: 'Reposted!' });

@@ -17,7 +17,9 @@ import TopListsSection from '@/components/settings/TopListsSection';
 import GamingSetupSection from '@/components/settings/GamingSetupSection';
 import MemoriesSection from '@/components/settings/MemoriesSection';
 import PrivacySection from '@/components/settings/PrivacySection';
+import NotificationsSection from '@/components/settings/NotificationsSection';
 import AccountSection from '@/components/settings/AccountSection';
+import { createNotification } from '@/lib/notifications';
 import PageHeader from '@/components/shared/PageHeader';
 import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon } from 'lucide-react';
 
@@ -137,6 +139,13 @@ export default function Settings() {
       setAchievements((a) => [ach, ...a]);
       setNewAch({ title: '', description: '', game: '', platform: 'PlayStation', rarity: 'Rare', earned_date: '' });
       setShowAchForm(false);
+      const icon = newAch.rarity === 'Legendary' ? '🏆' : newAch.rarity === 'Epic' ? '🥇' : '🎖️';
+      await createNotification({
+        recipientId: user?.id, type: 'achievement', force: true,
+        title: 'Achievement unlocked!', icon,
+        content: `You unlocked "${newAch.title}" in ${newAch.game}.`,
+        link: '/profile', actorId: user?.id,
+      });
     } catch {
       toast({ title: 'Failed to add achievement', variant: 'destructive' });
     } finally {
@@ -158,6 +167,8 @@ export default function Settings() {
       <AccountSection />
 
       <section><PrivacySection /></section>
+
+      <section><NotificationsSection /></section>
 
       {/* Activity Logging */}
       <ActivitySection onLogged={() => toast({ title: 'Activity shared!' })} />

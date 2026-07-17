@@ -6,6 +6,9 @@ import PostComposer from '@/components/feed/PostComposer';
 import PostCard from '@/components/feed/PostCard';
 import GameCard from '@/components/shared/GameCard';
 import HomeDashboard from '@/components/home/HomeDashboard';
+import WelcomeBanner from '@/components/onboarding/WelcomeBanner';
+import NewUserChecklist from '@/components/onboarding/NewUserChecklist';
+import SmartRecommendations from '@/components/onboarding/SmartRecommendations';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import { SkeletonFeed } from '@/components/shared/Skeleton';
@@ -13,7 +16,7 @@ import { Sparkles, TrendingUp, Flame, Users, LayoutDashboard, MessageSquare, Com
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, checkUserAuth } = useAuth();
   const [posts, setPosts] = useState([]);
   const [authors, setAuthors] = useState({});
   const [loading, setLoading] = useState(true);
@@ -77,7 +80,12 @@ export default function Home() {
         </div>
 
         {view === 'dashboard' ? (
-          <HomeDashboard />
+          <div className="space-y-5 animate-fade-in">
+            {!user?.has_seen_welcome && <WelcomeBanner user={user} onSeen={checkUserAuth} />}
+            <NewUserChecklist />
+            <SmartRecommendations user={user} />
+            <HomeDashboard />
+          </div>
         ) : (
           <div className="animate-fade-in">
             <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">

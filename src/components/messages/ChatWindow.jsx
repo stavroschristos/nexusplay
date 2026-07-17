@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Send, Loader2, Ban, Flag, MoreVertical } from 'lucide-react';
+import { createNotification } from '@/lib/notifications';
 
 export default function ChatWindow({ conversation, otherUser, onBack }) {
   const { user } = useAuth();
@@ -56,6 +57,15 @@ export default function ChatWindow({ conversation, otherUser, onBack }) {
         last_message_preview: content,
         last_message_at: new Date().toISOString(),
       });
+      if (otherUser?.id && otherUser.id !== user?.id) {
+        await createNotification({
+          recipientId: otherUser.id, type: 'message',
+          content: `${user?.display_name || 'Someone'} sent you a message`,
+          link: '/messages', icon: '💬',
+          actorId: user?.id, actorName: user?.display_name || user?.full_name,
+          metadata: { conversation_id: conversation.id },
+        });
+      }
     } catch {
       setText(content);
     } finally {
