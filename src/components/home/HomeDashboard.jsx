@@ -18,10 +18,8 @@ export default function HomeDashboard({ onRefresh }) {
       base44.entities.Community.list('-members_count', 5),
       base44.entities.Challenge.list('-created_date', 5),
       base44.entities.UserChallenge.filter({ created_by_id: user.id, completed: false }),
-      base44.entities.Achievement.filter({}, '-earned_date', 20),
       base44.entities.Stream.filter({ is_live: true }, '-viewers', 5),
-      base44.entities.Notification.filter({ read: false }),
-    ]).then(([follows, games, comms, challenges, activeCh, ach, streams, notifs]) => {
+    ]).then(([follows, games, comms, challenges, activeCh, streams]) => {
       base44.entities.User.list().then((allUsers) => {
         const friendIds = follows.map((f) => f.following_id);
         const friends = allUsers.filter((u) => friendIds.includes(u.id));
@@ -33,7 +31,7 @@ export default function HomeDashboard({ onRefresh }) {
           return { user: f, status, game: games2[Math.floor(Math.random() * games2.length)], platform: platforms[Math.floor(Math.random() * platforms.length)] };
         });
         const recentAchievers = friends.slice(0, 3).map((f) => ({ user: f, game: games2[Math.floor(Math.random() * games2.length)] }));
-        setData({ friendPresence, recentAchievers, games, comms, challenges, activeCh, streams, notifs, friendCount: friends.length });
+        setData({ friendPresence, recentAchievers, games, comms, challenges, activeCh, streams, friendCount: friends.length });
       });
     }).finally(() => setLoading(false));
   }, [user]);
