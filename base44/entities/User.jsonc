@@ -24,6 +24,21 @@
       "type": "string",
       "description": "Profile banner image URL"
     },
+    "profile_theme": {
+      "type": "string",
+      "enum": [
+        "nebula",
+        "aurora",
+        "sunset",
+        "cyber",
+        "ocean",
+        "forest",
+        "ember",
+        "void"
+      ],
+      "default": "nebula",
+      "description": "Visual theme for the profile (animated background + accent)"
+    },
     "favorite_games": {
       "type": "array",
       "items": {
@@ -106,7 +121,56 @@
     },
     "gaming_personality": {
       "type": "string",
-      "description": "AI-generated gaming personality"
+      "description": "AI-generated gaming personality archetype"
+    },
+    "identity_archetype": {
+      "type": "string",
+      "description": "Combined archetype label (e.g. The Completionist Explorer)"
+    },
+    "identity_summary": {
+      "type": "string",
+      "description": "AI-generated one-paragraph gaming identity summary"
+    },
+    "completion_style": {
+      "type": "string",
+      "enum": [
+        "Completionist",
+        "Main Story Focus",
+        "Side Quest Explorer",
+        "Casual",
+        "Hardcore 100%",
+        "Story Skipper"
+      ],
+      "description": "How the user approaches game completion"
+    },
+    "competitive_level": {
+      "type": "string",
+      "enum": [
+        "Casual",
+        "Recreational",
+        "Competitive",
+        "Ranked Grinder",
+        "Esports Hopeful"
+      ],
+      "description": "Competitive intensity"
+    },
+    "multiplayer_preference": {
+      "type": "string",
+      "enum": [
+        "Solo Only",
+        "Co-op",
+        "Team Player",
+        "Versus",
+        "Mixed"
+      ],
+      "description": "Multiplayer vs solo preference"
+    },
+    "gaming_habits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Short habit tags (e.g. Night Owl, Weekend Warrior, Speedrunner)"
     },
     "status": {
       "type": "string",

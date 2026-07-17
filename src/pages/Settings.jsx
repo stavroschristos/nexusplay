@@ -12,7 +12,11 @@ import ActivitySection from '@/components/settings/ActivitySection';
 import CollectionsSection from '@/components/settings/CollectionsSection';
 import MilestonesSection from '@/components/settings/MilestonesSection';
 import StatsSection from '@/components/settings/StatsSection';
-import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X } from 'lucide-react';
+import CustomizeSection from '@/components/settings/CustomizeSection';
+import TopListsSection from '@/components/settings/TopListsSection';
+import GamingSetupSection from '@/components/settings/GamingSetupSection';
+import MemoriesSection from '@/components/settings/MemoriesSection';
+import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, ListOrdered, Camera } from 'lucide-react';
 
 const platforms = ['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net'];
 const allGenres = ['RPG', 'Action', 'Adventure', 'Shooter', 'Strategy', 'Horror', 'Racing', 'Sports', 'Fighting', 'Puzzle', 'Sandbox', 'MMO', 'Roguelike', 'Indie'];
@@ -47,6 +51,9 @@ export default function Settings() {
 
   const [collections, setCollections] = useState([]);
   const [milestones, setMilestones] = useState([]);
+  const [topLists, setTopLists] = useState([]);
+  const [setups, setSetups] = useState([]);
+  const [memories, setMemories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,8 +72,11 @@ export default function Settings() {
       base44.entities.Achievement.filter({ created_by_id: user?.id }, '-earned_date', 50),
       base44.entities.Collection.filter({ created_by_id: user?.id }, '-created_date', 50),
       base44.entities.Timeline.filter({ created_by_id: user?.id }, '-year', 50),
-    ]).then(([accs, achs, cols, ms]) => {
-      setAccounts(accs); setAchievements(achs); setCollections(cols); setMilestones(ms);
+      base44.entities.TopList.filter({ created_by_id: user?.id }, '-created_date', 50),
+      base44.entities.GamingSetup.filter({ created_by_id: user?.id }, '-created_date', 50),
+      base44.entities.Memory.filter({ created_by_id: user?.id }, '-memory_date', 50),
+    ]).then(([accs, achs, cols, ms, tls, set, mems]) => {
+      setAccounts(accs); setAchievements(achs); setCollections(cols); setMilestones(ms); setTopLists(tls); setSetups(set); setMemories(mems);
     }).finally(() => setLoading(false));
   }, [user]);
 
@@ -142,6 +152,52 @@ export default function Settings() {
 
       {/* Activity Logging */}
       <ActivitySection onLogged={() => toast({ title: 'Activity shared!' })} />
+
+      {/* Profile Customization (theme, identity dimensions, habits) */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><Palette className="w-4 h-4" /> Profile Customization</h2>
+        <CustomizeSection user={user} onSaved={() => checkUserAuth()} />
+      </section>
+
+      {/* Achievement Showcase pins */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><Trophy className="w-4 h-4" /> Achievement Showcase</h2>
+        <p className="text-xs text-muted-foreground">Pin your proudest trophies to feature them on your profile.</p>
+        {achievements.length === 0 ? <p className="text-center text-muted-foreground py-4 text-sm">No achievements yet.</p> : (
+          <div className="grid sm:grid-cols-2 gap-2">
+            {achievements.map((a) => (
+              <button
+                key={a.id}
+                onClick={async () => {
+                  try {
+                    await base44.entities.Achievement.update(a.id, { is_showcased: !a.is_showcased });
+                    setAchievements((prev) => prev.map((x) => x.id === a.id ? { ...x, is_showcased: !x.is_showcased } : x));
+                  } catch { toast({ title: 'Failed to update', variant: 'destructive' }); }
+                }}
+                className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${a.is_showcased ? 'border-amber-500/50 bg-amber-500/10' : 'border-border bg-card/50 hover:border-primary/40'}`}
+              >
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${a.is_showcased ? 'bg-amber-500/20' : 'bg-secondary/40'}`}>
+                  <Trophy className={`w-4 h-4 ${a.is_showcased ? 'text-amber-400' : 'text-muted-foreground'}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{a.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{a.game} · {a.rarity}</p>
+                </div>
+                {a.is_showcased && <span className="text-[10px] font-bold uppercase text-amber-400">Pinned</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Top Lists */}
+      <section><TopListsSection lists={topLists} onAdded={(l) => setTopLists((prev) => [l, ...prev])} onRemoved={(id) => setTopLists((prev) => prev.filter((l) => l.id !== id))} /></section>
+
+      {/* Gaming Setup */}
+      <section><GamingSetupSection setups={setups} onAdded={(s) => setSetups((prev) => [s, ...prev])} onRemoved={(id) => setSetups((prev) => prev.filter((s) => s.id !== id))} /></section>
+
+      {/* Gaming Memories */}
+      <section><MemoriesSection memories={memories} onAdded={(m) => setMemories((prev) => [m, ...prev])} onRemoved={(id) => setMemories((prev) => prev.filter((x) => x.id !== id))} /></section>
 
       {/* Profile */}
       <section className="space-y-4">

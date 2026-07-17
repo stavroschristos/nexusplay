@@ -50,6 +50,24 @@
 }
 
 @layer utilities {
+  @keyframes drift-nebula { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(4%, -3%) scale(1.08); } }
+  @keyframes drift-aurora { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-3%, 4%) rotate(2deg); } }
+  @keyframes drift-sunset { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(3%, 3%) scale(1.1); } }
+  @keyframes drift-cyber { 0%,100% { transform: translate(0,0) skewX(0deg); } 50% { transform: translate(-2%, 2%) skewX(-2deg); } }
+  @keyframes drift-ocean { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%, -4%) scale(1.06); } }
+  @keyframes drift-forest { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-3%, -2%); } }
+  @keyframes drift-ember { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%, 3%) scale(1.12); } }
+  @keyframes drift-void { 0%,100% { transform: translate(0,0); } 50% { transform: translate(1%, -1%); } }
+
+  .theme-nebula .theme-anim { animation: drift-nebula 18s ease-in-out infinite; }
+  .theme-aurora .theme-anim { animation: drift-aurora 16s ease-in-out infinite; }
+  .theme-sunset .theme-anim { animation: drift-sunset 20s ease-in-out infinite; }
+  .theme-cyber .theme-anim { animation: drift-cyber 14s ease-in-out infinite; }
+  .theme-ocean .theme-anim { animation: drift-ocean 17s ease-in-out infinite; }
+  .theme-forest .theme-anim { animation: drift-forest 19s ease-in-out infinite; }
+  .theme-ember .theme-anim { animation: drift-ember 15s ease-in-out infinite; }
+  .theme-void .theme-anim { animation: drift-void 22s ease-in-out infinite; }
+
   .glass {
     background: hsl(250 14% 10% / 0.7);
     backdrop-filter: blur(12px);

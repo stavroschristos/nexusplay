@@ -1,0 +1,39 @@
+{
+  "name": "TopList",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "List title (e.g. Top 10 RPGs of All Time)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional context for the list"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "games",
+        "franchises",
+        "characters",
+        "moments",
+        "soundtracks",
+        "bosses",
+        "custom"
+      ],
+      "default": "games",
+      "description": "What the list ranks"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ranked entries (index 0 = #1)"
+    }
+  },
+  "required": [
+    "title",
+    "items"
+  ]
+}

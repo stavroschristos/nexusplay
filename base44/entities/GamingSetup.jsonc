@@ -1,0 +1,28 @@
+{
+  "name": "GamingSetup",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Setup name (e.g. The Battle Station)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Details about the setup"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Main setup photo URL"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Key gear/components (PC, monitor, controller, etc.)"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

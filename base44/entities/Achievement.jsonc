@@ -47,6 +47,11 @@
       "type": "string",
       "format": "date",
       "description": "When the achievement was earned"
+    },
+    "is_showcased": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this achievement is pinned to the profile showcase"
     }
   },
   "required": [
