@@ -33,7 +33,8 @@ export default function CollectionDetail() {
       setComments(comments);
       if (likes.length > 0) { setLiked(true); setLikeId(likes[0].id); }
       if (col) {
-        const users = await base44.entities.User.list();
+        const pubRes = await base44.functions.invoke('publicUsers', { action: 'list' });
+        const users = pubRes.data?.users || [];
         setAuthor(users.find((u) => u.id === col.created_by_id));
       }
     }).finally(() => setLoading(false));

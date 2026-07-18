@@ -41,22 +41,28 @@ export default function GameDetail() {
       setFollowing(follows.length > 0);
       const authorIds = [...new Set(gamePosts.map((p) => p.created_by_id))];
       if (authorIds.length > 0) {
-        const users = await base44.entities.User.list();
+        const pubRes = await base44.functions.invoke('publicUsers', { action: 'list' });
         const map = {};
-        users.forEach((u) => { map[u.id] = u; });
+        (pubRes.data?.users || []).forEach((u) => { map[u.id] = u; });
         setAuthors(map);
       }
     }).finally(() => setLoading(false));
   }, [id, user?.id]);
 
   const toggleFollow = async () => {
-    if (following) {
-      const existing = await base44.entities.GameFollow.filter({ game_id: id, created_by_id: user.id });
-      if (existing[0]) await base44.entities.GameFollow.delete(existing[0].id);
-      setFollowing(false);
-    } else {
-      await base44.entities.GameFollow.create({ game_id: id });
-      setFollowing(true);
+    try {
+      if (following) {
+        const existing = await base44.entities.GameFollow.filter({ game_id: id, created_by_id: user.id });
+        if (existing[0]) await base44.entities.GameFollow.delete(existing[0].id);
+        setFollowing(false);
+        toast({ title: 'Unfollowed game' });
+      } else {
+        await base44.entities.GameFollow.create({ game_id: id });
+        setFollowing(true);
+        toast({ title: 'Following game' });
+      }
+    } catch {
+      toast({ title: 'Something went wrong', variant: 'destructive' });
     }
   };
 

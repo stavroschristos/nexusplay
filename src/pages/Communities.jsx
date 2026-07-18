@@ -59,17 +59,23 @@ export default function Communities() {
 
   const toggleJoin = async (comm) => {
     const newSet = new Set(joinedIds);
-    if (newSet.has(comm.id)) {
-      const existing = await base44.entities.CommunityMember.filter({ community_id: comm.id, created_by_id: user.id });
-      if (existing[0]) await base44.entities.CommunityMember.delete(existing[0].id);
-      newSet.delete(comm.id);
-      await base44.entities.Community.update(comm.id, { members_count: Math.max(0, (comm.members_count || 1) - 1) });
-    } else {
-      await base44.entities.CommunityMember.create({ community_id: comm.id, role: 'member' });
-      newSet.add(comm.id);
-      await base44.entities.Community.update(comm.id, { members_count: (comm.members_count || 0) + 1 });
+    try {
+      if (newSet.has(comm.id)) {
+        const existing = await base44.entities.CommunityMember.filter({ community_id: comm.id, created_by_id: user.id });
+        if (existing[0]) await base44.entities.CommunityMember.delete(existing[0].id);
+        newSet.delete(comm.id);
+        await base44.entities.Community.update(comm.id, { members_count: Math.max(0, (comm.members_count || 1) - 1) });
+        toast({ title: 'Left community' });
+      } else {
+        await base44.entities.CommunityMember.create({ community_id: comm.id, role: 'member' });
+        newSet.add(comm.id);
+        await base44.entities.Community.update(comm.id, { members_count: (comm.members_count || 0) + 1 });
+        toast({ title: 'Joined!' });
+      }
+      setJoinedIds(newSet);
+    } catch {
+      toast({ title: 'Something went wrong', variant: 'destructive' });
     }
-    setJoinedIds(newSet);
   };
 
   const filtered = communities.filter((c) => {

@@ -68,6 +68,7 @@ export default function ChatWindow({ conversation, otherUser, onBack }) {
       }
     } catch {
       setText(content);
+      toast({ title: 'Failed to send message', variant: 'destructive' });
     } finally {
       setSending(false);
     }

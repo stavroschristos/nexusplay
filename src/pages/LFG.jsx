@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ const skills = ['Beginner', 'Casual', 'Intermediate', 'Advanced', 'Pro'];
 export default function LFG() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [authors, setAuthors] = useState({});
   const [loading, setLoading] = useState(true);
@@ -160,7 +161,20 @@ export default function LFG() {
                     <Link to={`/profile/${p.created_by_id}`} className="text-sm font-medium hover:text-primary">{author?.display_name || author?.full_name || 'Gamer'}</Link>
                     <p className="text-xs text-muted-foreground">Looking for {p.players_needed} player{p.players_needed > 1 ? 's' : ''}</p>
                   </div>
-                  <Button size="sm" variant="default" className="rounded-full h-8 text-xs" onClick={() => toast({ title: 'Interest sent! Check your messages.' })}>I'm Interested</Button>
+                  <Button size="sm" variant="default" className="rounded-full h-8 text-xs" onClick={async () => {
+                    try {
+                      const authorId = p.created_by_id;
+                      if (!authorId || authorId === user?.id) { toast({ title: "That's your own post!" }); return; }
+                      const [a, b] = [user.id, authorId].sort();
+                      const key = `${a}_${b}`;
+                      const existing = await base44.entities.Conversation.filter({ key });
+                      let conv = existing[0];
+                      if (!conv) conv = await base44.entities.Conversation.create({ participant_ids: [user.id, authorId], key });
+                      navigate('/messages', { state: { conversationId: conv.id } });
+                    } catch {
+                      toast({ title: 'Could not start conversation', variant: 'destructive' });
+                    }
+                  }}>I'm Interested</Button>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <Gamepad2 className="w-4 h-4 text-primary" />

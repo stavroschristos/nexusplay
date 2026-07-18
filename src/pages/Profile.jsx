@@ -97,21 +97,27 @@ export default function Profile() {
   }, [profileId, currentUser]);
 
   const toggleFollow = async () => {
-    if (isFollowing) {
-      const existing = await base44.entities.Follow.filter({ follower_id: currentUser.id, following_id: profileId });
-      if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
-      setIsFollowing(false); setFollowers((f) => f - 1);
-    } else {
-      await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: profileId });
-      setIsFollowing(true); setFollowers((f) => f + 1);
-      await createNotification({
-        recipientId: profileId, type: 'follow',
-        content: `${currentUser?.display_name || 'Someone'} started following you`,
-        link: `/profile/${currentUser?.id}`, icon: '🤝',
-        actorId: currentUser?.id, actorName: currentUser?.display_name || currentUser?.full_name,
-      });
-      recordFirstAction(currentUser, 'follow');
-      markActivatedIfNeeded(currentUser).catch(() => {});
+    try {
+      if (isFollowing) {
+        const existing = await base44.entities.Follow.filter({ follower_id: currentUser.id, following_id: profileId });
+        if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
+        setIsFollowing(false); setFollowers((f) => f - 1);
+        toast({ title: 'Unfollowed' });
+      } else {
+        await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: profileId });
+        setIsFollowing(true); setFollowers((f) => f + 1);
+        toast({ title: 'Following' });
+        await createNotification({
+          recipientId: profileId, type: 'follow',
+          content: `${currentUser?.display_name || 'Someone'} started following you`,
+          link: `/profile/${currentUser?.id}`, icon: '🤝',
+          actorId: currentUser?.id, actorName: currentUser?.display_name || currentUser?.full_name,
+        });
+        recordFirstAction(currentUser, 'follow');
+        markActivatedIfNeeded(currentUser).catch(() => {});
+      }
+    } catch {
+      toast({ title: 'Something went wrong', variant: 'destructive' });
     }
   };
 
@@ -141,11 +147,15 @@ export default function Profile() {
         const rec = await base44.entities.Block.filter({ blocked_id: profileId });
         if (rec[0]) await base44.entities.Block.delete(rec[0].id);
         setIsBlocked(false);
+        toast({ title: 'User unblocked' });
       } else {
         await base44.entities.Block.create({ blocked_id: profileId, blocked_name: profileUser?.display_name || profileUser?.full_name });
         setIsBlocked(true);
+        toast({ title: 'User blocked' });
       }
-    } catch { /* ignore */ }
+    } catch {
+      toast({ title: 'Something went wrong', variant: 'destructive' });
+    }
   };
 
   if (loading) {

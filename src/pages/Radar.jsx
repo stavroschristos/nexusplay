@@ -33,7 +33,8 @@ export default function Radar() {
   useEffect(() => {
     if (follows.length === 0) { setPresences([]); return; }
     const ids = follows.map((f) => f.following_id);
-    base44.entities.User.list().then((allUsers) => {
+    base44.functions.invoke('publicUsers', { action: 'list' }).then((pubRes) => {
+      const allUsers = pubRes.data?.users || [];
       const friends = allUsers.filter((u) => ids.includes(u.id));
       base44.entities.GameAccount.filter({}).then((accounts) => {
         base44.entities.Achievement.filter({}, '-earned_date', 50).then((ach) => {

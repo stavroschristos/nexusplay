@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { createNotification } from '@/lib/notifications';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +40,7 @@ const TABS = [
 
 export default function Explore() {
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
   const [users, setUsers] = useState([]);
   const [accountsMap, setAccountsMap] = useState({});
   const [followingIds, setFollowingIds] = useState(new Set());
@@ -93,22 +96,28 @@ export default function Explore() {
 
   const toggleFollow = async (userId) => {
     const newSet = new Set(followingIds);
-    if (newSet.has(userId)) {
-      const existing = await base44.entities.Follow.filter({ follower_id: currentUser.id, following_id: userId });
-      if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
-      newSet.delete(userId);
-    } else {
-      await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: userId });
-      newSet.add(userId);
-      await base44.entities.Notification.create({
-        type: 'follow',
-        content: `${currentUser?.display_name || 'Someone'} started following you`,
-        link: `/profile/${currentUser?.id}`,
-        actor_id: currentUser?.id,
-        actor_name: currentUser?.display_name || currentUser?.full_name,
-      });
+    const willFollow = !newSet.has(userId);
+    try {
+      if (!willFollow) {
+        const existing = await base44.entities.Follow.filter({ follower_id: currentUser.id, following_id: userId });
+        if (existing[0]) await base44.entities.Follow.delete(existing[0].id);
+        newSet.delete(userId);
+        toast({ title: 'Unfollowed' });
+      } else {
+        await base44.entities.Follow.create({ follower_id: currentUser.id, following_id: userId });
+        newSet.add(userId);
+        await createNotification({
+          recipientId: userId, type: 'follow',
+          content: `${currentUser?.display_name || 'Someone'} started following you`,
+          link: `/profile/${currentUser?.id}`, icon: '🤝',
+          actorId: currentUser?.id, actorName: currentUser?.display_name || currentUser?.full_name,
+        });
+        toast({ title: 'Following' });
+      }
+      setFollowingIds(newSet);
+    } catch {
+      toast({ title: 'Something went wrong', variant: 'destructive' });
     }
-    setFollowingIds(newSet);
   };
 
   const userData = useMemo(() => {

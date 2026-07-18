@@ -36,9 +36,13 @@ export default function Challenges() {
   const join = async (challenge) => {
     const existing = getProgress(challenge.id);
     if (existing) return;
-    const uc = await base44.entities.UserChallenge.create({ challenge_id: challenge.id, progress: 0, completed: false });
-    setProgress((p) => [...p, uc]);
-    toast({ title: 'Challenge joined!' });
+    try {
+      const uc = await base44.entities.UserChallenge.create({ challenge_id: challenge.id, progress: 0, completed: false });
+      setProgress((p) => [...p, uc]);
+      toast({ title: 'Challenge joined!' });
+    } catch {
+      toast({ title: 'Failed to join challenge', variant: 'destructive' });
+    }
   };
 
   const increment = async (challenge) => {
@@ -46,9 +50,13 @@ export default function Challenges() {
     if (!uc || uc.completed) return;
     const newProg = uc.progress + 1;
     const done = newProg >= challenge.target;
-    await base44.entities.UserChallenge.update(uc.id, { progress: newProg, completed: done, completed_at: done ? new Date().toISOString() : undefined });
-    setProgress((p) => p.map((x) => x.id === uc.id ? { ...x, progress: newProg, completed: done } : x));
-    if (done) toast({ title: `Challenge complete! +${challenge.xp_reward} XP`, description: challenge.badge_icon || '🏆' });
+    try {
+      await base44.entities.UserChallenge.update(uc.id, { progress: newProg, completed: done, completed_at: done ? new Date().toISOString() : undefined });
+      setProgress((p) => p.map((x) => x.id === uc.id ? { ...x, progress: newProg, completed: done } : x));
+      if (done) toast({ title: `Challenge complete! +${challenge.xp_reward} XP`, description: challenge.badge_icon || '🏆' });
+    } catch {
+      toast({ title: 'Failed to update progress', variant: 'destructive' });
+    }
   };
 
   if (loading) {

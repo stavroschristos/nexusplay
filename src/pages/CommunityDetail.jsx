@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 import PostComposer from '@/components/feed/PostComposer';
 import PostCard from '@/components/feed/PostCard';
 import { Loader2, Users, Hash, LogIn, UserX } from 'lucide-react';
@@ -10,6 +11,7 @@ import { Loader2, Users, Hash, LogIn, UserX } from 'lucide-react';
 export default function CommunityDetail() {
   const { id } = useParams();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
   const [authors, setAuthors] = useState({});
@@ -29,24 +31,30 @@ export default function CommunityDetail() {
       setJoined(myMembership.length > 0);
       const authorIds = [...new Set(commPosts.map((p) => p.created_by_id))];
       if (authorIds.length > 0) {
-        const users = await base44.entities.User.list();
+        const pubRes = await base44.functions.invoke('publicUsers', { action: 'list' });
         const map = {};
-        users.forEach((u) => { map[u.id] = u; });
+        (pubRes.data?.users || []).forEach((u) => { map[u.id] = u; });
         setAuthors(map);
       }
     }).finally(() => setLoading(false));
   }, [id, user?.id]);
 
   const toggleJoin = async () => {
-    if (joined) {
-      const existing = await base44.entities.CommunityMember.filter({ community_id: id, created_by_id: user.id });
-      if (existing[0]) await base44.entities.CommunityMember.delete(existing[0].id);
-      setJoined(false);
-      await base44.entities.Community.update(id, { members_count: Math.max(0, (community.members_count || 1) - 1) });
-    } else {
-      await base44.entities.CommunityMember.create({ community_id: id, role: 'member' });
-      setJoined(true);
-      await base44.entities.Community.update(id, { members_count: (community.members_count || 0) + 1 });
+    try {
+      if (joined) {
+        const existing = await base44.entities.CommunityMember.filter({ community_id: id, created_by_id: user.id });
+        if (existing[0]) await base44.entities.CommunityMember.delete(existing[0].id);
+        setJoined(false);
+        await base44.entities.Community.update(id, { members_count: Math.max(0, (community.members_count || 1) - 1) });
+        toast({ title: 'Left community' });
+      } else {
+        await base44.entities.CommunityMember.create({ community_id: id, role: 'member' });
+        setJoined(true);
+        await base44.entities.Community.update(id, { members_count: (community.members_count || 0) + 1 });
+        toast({ title: 'Joined!' });
+      }
+    } catch {
+      toast({ title: 'Something went wrong', variant: 'destructive' });
     }
   };
 
