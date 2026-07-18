@@ -17,17 +17,41 @@
     },
     "username": {
       "type": "string",
-      "description": "The gamer's username/handle on this platform"
+      "description": "The gamer's public username/handle on this platform (never a password)"
     },
     "level": {
       "type": "number",
       "default": 0,
       "description": "Player level on this platform"
     },
+    "connection_method": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "oauth"
+      ],
+      "default": "manual",
+      "description": "How this account was linked: manual handle entry or official OAuth"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "revoked"
+      ],
+      "default": "active",
+      "description": "Connection status"
+    },
+    "connected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the account was linked"
+    },
     "is_verified": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this account is verified"
+      "description": "Whether this account is verified via official OAuth"
     }
   },
   "required": [

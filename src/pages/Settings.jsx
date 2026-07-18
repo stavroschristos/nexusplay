@@ -27,7 +27,7 @@ import { createNotification } from '@/lib/notifications';
 import { computeProfileCompletion, markActivatedIfNeeded, trackJourney } from '@/lib/journey';
 import PageHeader from '@/components/shared/PageHeader';
 import OnboardingResumeBanner from '@/components/onboarding/OnboardingResumeBanner';
-import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon } from 'lucide-react';
+import { Loader2, Save, Plus, Trash2, Gamepad2, Trophy, X, Palette, Settings as SettingsIcon, Shield } from 'lucide-react';
 
 const platforms = ['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net'];
 const allGenres = ['RPG', 'Action', 'Adventure', 'Shooter', 'Strategy', 'Horror', 'Racing', 'Sports', 'Fighting', 'Puzzle', 'Sandbox', 'MMO', 'Roguelike', 'Indie'];
@@ -149,7 +149,7 @@ export default function Settings() {
     if (!newAccount.username.trim()) return;
     setSavingAccount(true);
     try {
-      const acc = await base44.entities.GameAccount.create({ platform: newAccount.platform, username: newAccount.username.trim(), level: Number(newAccount.level) || 0 });
+      const acc = await base44.entities.GameAccount.create({ platform: newAccount.platform, username: newAccount.username.trim(), level: Number(newAccount.level) || 0, connection_method: 'manual', status: 'active', connected_at: new Date().toISOString() });
       setAccounts((a) => [acc, ...a]);
       setNewAccount({ platform: 'PlayStation', username: '', level: 0 });
       setShowAccountForm(false);
@@ -289,9 +289,10 @@ export default function Settings() {
       {/* Game Accounts */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><Gamepad2 className="w-4 h-4" /> Game Accounts</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2"><Gamepad2 className="w-4 h-4" /> Connected Accounts</h2>
           <Button variant="outline" size="sm" onClick={() => setShowAccountForm(!showAccountForm)} className="rounded-full">{showAccountForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}{showAccountForm ? 'Cancel' : 'Add'}</Button>
         </div>
+        <p className="text-xs text-muted-foreground -mt-2 flex items-start gap-1.5"><Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" /> Manual handles only store your public username — we never ask for or store your platform password. You can disconnect any account at any time.</p>
         {showAccountForm && (
           <div className="rounded-2xl border border-border bg-card/50 p-5 space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -302,9 +303,24 @@ export default function Settings() {
             <Button onClick={addAccount} disabled={savingAccount || !newAccount.username.trim()} className="w-full">{savingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Add Account</Button>
           </div>
         )}
-        {accounts.length === 0 ? <p className="text-center text-muted-foreground py-4 text-sm">No game accounts linked.</p> : (
+        {accounts.length === 0 ? <p className="text-center text-muted-foreground py-4 text-sm">No gaming handles added yet.</p> : (
           <div className="grid sm:grid-cols-2 gap-3">{accounts.map((a) => <GameAccountBadge key={a.id} account={a} onRemove={() => removeAccount(a.id)} />)}</div>
         )}
+        <div className="rounded-xl border border-dashed border-border bg-secondary/20 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold">Official platform connections</h3>
+            <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Coming Soon</span>
+          </div>
+          <p className="text-xs text-muted-foreground">Securely import your library, achievements, and playtime using each platform's official OAuth login. Your password is never shared with or stored by NexusPlay.</p>
+          <div className="flex flex-wrap gap-2">
+            {platforms.map((p) => (
+              <button key={p} disabled className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-secondary/40 text-muted-foreground cursor-not-allowed opacity-70 border border-border">
+                {p} <span className="text-[9px] uppercase">Soon</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Achievements */}

@@ -158,6 +158,11 @@ export default function AccountSection() {
           <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           <Link to="/guidelines" className="hover:text-foreground">Community Guidelines</Link>
           <Link to="/cookies" className="hover:text-foreground">Cookie Policy</Link>
+          <Link to="/security" className="hover:text-foreground font-medium text-primary">Security</Link>
+          <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+          <Link to="/guidelines" className="hover:text-foreground">Community Guidelines</Link>
+          <Link to="/cookies" className="hover:text-foreground">Cookie Policy</Link>
           <Link to="/data-usage" className="hover:text-foreground">Data Usage</Link>
         </div>
       </div>

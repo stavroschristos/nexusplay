@@ -34,6 +34,7 @@ import Terms from '@/pages/Terms';
 import CommunityGuidelines from '@/pages/CommunityGuidelines';
 import DataUsage from '@/pages/DataUsage';
 import CookiePolicy from '@/pages/CookiePolicy';
+import Security from '@/pages/Security';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
       <Route path="/guidelines" element={<CommunityGuidelines />} />
       <Route path="/data-usage" element={<DataUsage />} />
       <Route path="/cookies" element={<CookiePolicy />} />
+      <Route path="/security" element={<Security />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>

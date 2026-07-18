@@ -14,6 +14,7 @@ export default function LegalLayout({ title, lastUpdated, children }) {
           {children}
         </div>
         <div className="mt-12 pt-6 border-t border-border flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <Link to="/security" className="hover:text-foreground font-medium text-primary">Security</Link>
           <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
           <Link to="/guidelines" className="hover:text-foreground">Community Guidelines</Link>

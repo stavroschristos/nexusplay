@@ -18,9 +18,9 @@ export default function Messages() {
 
   useEffect(() => {
     if (!user?.id) return;
-    base44.entities.User.list().then((all) => {
+    base44.functions.invoke('publicUsers', { action: 'list' }).then((r) => {
       const map = {};
-      all.forEach((u) => { map[u.id] = u; });
+      (r.data.users || []).forEach((u) => { map[u.id] = u; });
       setUsers(map);
     });
     loadConversations();
