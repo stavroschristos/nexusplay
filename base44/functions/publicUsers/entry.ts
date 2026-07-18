@@ -23,6 +23,31 @@ function sanitize(user) {
   return copy;
 }
 
+// Seed/demo content was authored by a non-user service account whose id can't be
+// reassigned (created_by_id is immutable). Synthesize a valid public identity for
+// those known seeder ids so the demo feed never shows "Unknown User" and the author
+// links to a working profile instead of "User not found".
+const DEMO_AUTHORS = {
+  'service_064eb0fa-8c37-473c-9572-10c4e29087ca': {
+    id: 'service_064eb0fa-8c37-473c-9572-10c4e29087ca',
+    display_name: 'NexusPlay Community',
+    gamer_tag: 'nexusplay',
+    bio: 'Official NexusPlay demo content — showcasing what a vibrant gaming feed looks like during alpha.',
+    role: 'user',
+    avatar_url: '',
+    banner_url: '',
+    profile_theme: 'nebula',
+    favorite_genres: [],
+    favorite_games: [],
+    platforms_owned: [],
+    privacy_profile: 'public',
+  },
+};
+
+function syntheticAuthor(id) {
+  return DEMO_AUTHORS[id] ? { ...DEMO_AUTHORS[id] } : null;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -41,7 +66,9 @@ Deno.serve(async (req) => {
     // lets admins read other users). Sensitive fields are stripped before returning.
     if (action === 'list') {
       const users = await base44.asServiceRole.entities.User.list('-created_date', 500);
-      return Response.json({ users: users.map(sanitize) });
+      const sanitized = users.map(sanitize);
+      Object.values(DEMO_AUTHORS).forEach((a) => sanitized.push(a));
+      return Response.json({ users: sanitized });
     }
 
     if (action === 'get') {
@@ -60,6 +87,8 @@ Deno.serve(async (req) => {
       }
       const id = payload?.id;
       if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
+      const synthetic = syntheticAuthor(id);
+      if (synthetic) return Response.json({ user: synthetic });
       let target = null;
       try {
         target = await base44.asServiceRole.entities.User.get(id);

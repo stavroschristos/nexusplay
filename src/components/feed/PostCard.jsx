@@ -162,7 +162,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
     toast({ title: 'Link copied' });
   };
 
-  const initials = (author?.display_name || author?.full_name || 'G').charAt(0).toUpperCase();
+  const initials = (author?.display_name || author?.gamer_tag || 'G').charAt(0).toUpperCase();
   const isOwner = post.created_by_id === user?.id;
   const isActivity = post.type === 'activity' && post.activity_type;
   const actConfig = isActivity ? activityConfig[post.activity_type] : null;
@@ -174,7 +174,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
         <div className={cn('flex items-center gap-2 px-4 pt-3', actConfig.bg)}>
           <ActIcon className={cn('w-4 h-4', actConfig.color)} />
           <p className="text-sm">
-            <span className="font-semibold">{author?.display_name || 'Gamer'}</span>{' '}
+            <span className="font-semibold">{author?.display_name || author?.gamer_tag || 'Gamer'}</span>{' '}
             <span className="text-muted-foreground">{actConfig.label}</span>{' '}
             {post.game_title && (
               <Link to={`/games/${post.game_id || ''}`} className="font-semibold text-primary hover:underline">
@@ -195,7 +195,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Link to={`/profile/${post.created_by_id}`} className="hover:underline">
-              <span className="font-semibold text-sm">{author?.display_name || author?.full_name || 'Unknown Gamer'}</span>
+              <span className="font-semibold text-sm">{author ? (author.display_name || author.gamer_tag || 'Gamer') : 'Unknown Gamer'}</span>
             </Link>
             <span className="text-xs text-muted-foreground">· {timeAgo(post.created_date)}</span>
             {post.type === 'repost' && <span className="text-xs text-muted-foreground flex items-center gap-1"><Repeat2 className="w-3 h-3" /> Reposted</span>}
