@@ -15,13 +15,13 @@ export default function Hero({ primaryHref = '/register', primaryLabel = 'Create
         </motion.div>
 
         <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.05 }}
-          className="font-heading font-bold tracking-tight text-balance text-4xl sm:text-6xl lg:text-7xl leading-[1.05]">
-          Your whole gaming life,<br /><span className="text-gradient bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">in one identity.</span>
+          className="font-heading font-bold tracking-tight text-balance text-3xl sm:text-5xl lg:text-6xl leading-[1.1]">
+          Steam knows your library.<br />PlayStation knows your trophies.<br /><span className="text-gradient bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">We know you.</span>
         </motion.h1>
 
         <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}
           className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          NexusPlay doesn't replace Steam, Discord, or your console — it connects them. Bring your games, achievements, friends, and memories together into one identity that travels with you across every platform.
+          Connect your gaming world and create the profile that represents who you are as a gamer.
         </motion.p>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
