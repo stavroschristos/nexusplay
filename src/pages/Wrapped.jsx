@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import PersonalityBadge from '@/components/shared/PersonalityBadge';
 
 export default function Wrapped() {
-  const { user } = useAuth();
+  const { user, checkUserAuth } = useAuth();
   const { toast } = useToast();
   const [achievements, setAchievements] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -38,8 +38,8 @@ Respond with ONLY the exact archetype name from the list, nothing else.`;
       const res = await base44.integrations.Core.InvokeLLM({ prompt, response_json_schema: { type: 'object', properties: { personality: { type: 'string' } } } });
       const personality = res.personality || res;
       await base44.auth.updateMe({ gaming_personality: personality });
+      await checkUserAuth();
       toast({ title: 'Personality revealed!', description: personality });
-      window.location.reload();
     } catch {
       toast({ title: 'Failed to generate personality', variant: 'destructive' });
     } finally {

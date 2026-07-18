@@ -47,18 +47,27 @@ Each array has 1-2 short, friendly, specific strings. Make them feel personal an
     }
   };
 
-  useEffect(() => {
+  const refresh = async () => {
     if (!user?.id) return;
-    Promise.all([
-      base44.entities.Achievement.filter({ created_by_id: user.id }, '-earned_date', 100),
-      base44.entities.GameReview.filter({ created_by_id: user.id }, '-created_date', 100),
-      base44.entities.Collection.filter({ created_by_id: user.id }, '-created_date', 50),
-      base44.entities.Post.filter({ created_by_id: user.id }, '-created_date', 50),
-    ]).then(([ach, rev, col, pst]) => {
+    try {
+      const [ach, rev, col, pst] = await Promise.all([
+        base44.entities.Achievement.filter({ created_by_id: user.id }, '-earned_date', 100),
+        base44.entities.GameReview.filter({ created_by_id: user.id }, '-created_date', 100),
+        base44.entities.Collection.filter({ created_by_id: user.id }, '-created_date', 50),
+        base44.entities.Post.filter({ created_by_id: user.id }, '-created_date', 50),
+      ]);
       const topGames = [...new Set([...ach.map((a) => a.game), ...pst.map((p) => p.game_title)].filter(Boolean))].slice(0, 10);
       const data = { achievementCount: ach.length, reviewCount: rev.length, collectionCount: col.length, topGames };
-      generate(data);
-    }).finally(() => setLoading(false));
+      await generate(data);
+    } catch {
+      setGenerating(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
   }, [user]);
 
   if (loading) {
@@ -106,7 +115,7 @@ Each array has 1-2 short, friendly, specific strings. Make them feel personal an
               </div>
             </div>
           ))}
-          <Button onClick={() => { setLoading(true); setTimeout(() => { setLoading(false); window.location.reload(); }, 100); }} variant="outline" className="w-full rounded-full">
+          <Button onClick={refresh} disabled={generating} variant="outline" className="w-full rounded-full">
             <Sparkles className="w-4 h-4" /> Refresh Insights
           </Button>
         </div>

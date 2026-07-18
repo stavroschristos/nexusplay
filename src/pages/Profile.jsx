@@ -62,7 +62,7 @@ export default function Profile() {
     setLoading(true);
     Promise.all([
       profileId === currentUser?.id ? Promise.resolve(currentUser) : base44.functions.invoke('publicUsers', { action: 'get', id: profileId }).then((r) => r.data.user),
-      base44.entities.Post.filter({ created_by_id: profileId }, '-created_date', 50),
+      base44.entities.Post.filter({ created_by_id: profileId, hidden: { $ne: true } }, '-created_date', 50),
       base44.entities.GameAccount.filter({ created_by_id: profileId }, '-created_date', 50),
       base44.entities.Achievement.filter({ created_by_id: profileId }, '-earned_date', 50),
       base44.entities.Collection.filter({ created_by_id: profileId }, '-created_date', 50),

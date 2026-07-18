@@ -51,23 +51,33 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
   const toggleLike = async () => {
     if (liked) {
       setLiked(false); setLikes((l) => l - 1);
-      if (likeId) await base44.entities.Like.delete(likeId);
-      await base44.entities.Post.update(post.id, { likes_count: Math.max(0, likes - 1) });
+      try {
+        if (likeId) await base44.entities.Like.delete(likeId);
+        await base44.entities.Post.update(post.id, { likes_count: Math.max(0, likes - 1) });
+      } catch {
+        setLiked(true); setLikes((l) => l + 1);
+        toast({ title: 'Failed to unlike', variant: 'destructive' });
+      }
     } else {
       setLiked(true); setLikes((l) => l + 1);
-      const like = await base44.entities.Like.create({ post_id: post.id });
-      setLikeId(like.id);
-      await base44.entities.Post.update(post.id, { likes_count: likes + 1 });
-      if (post.created_by_id !== user?.id) {
-        await createNotification({
-          recipientId: post.created_by_id, type: 'like',
-          content: `${user?.display_name || 'Someone'} liked your post`, link: '/home',
-          actorId: user?.id, actorName: user?.display_name || user?.full_name,
-          metadata: { post_id: post.id },
-        });
+      try {
+        const like = await base44.entities.Like.create({ post_id: post.id });
+        setLikeId(like.id);
+        await base44.entities.Post.update(post.id, { likes_count: likes + 1 });
+        if (post.created_by_id !== user?.id) {
+          await createNotification({
+            recipientId: post.created_by_id, type: 'like',
+            content: `${user?.display_name || 'Someone'} liked your post`, link: '/home',
+            actorId: user?.id, actorName: user?.display_name || user?.full_name,
+            metadata: { post_id: post.id },
+          });
+        }
+        recordFirstAction(user, 'like');
+        markActivatedIfNeeded(user).catch(() => {});
+      } catch {
+        setLiked(false); setLikes((l) => l - 1);
+        toast({ title: 'Failed to like', variant: 'destructive' });
       }
-      recordFirstAction(user, 'like');
-      markActivatedIfNeeded(user).catch(() => {});
     }
   };
 
@@ -190,7 +200,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
             <span className="text-xs text-muted-foreground">· {timeAgo(post.created_date)}</span>
             {post.type === 'repost' && <span className="text-xs text-muted-foreground flex items-center gap-1"><Repeat2 className="w-3 h-3" /> Reposted</span>}
             {isOwner && (
-              <button onClick={handleDelete} className="ml-auto text-muted-foreground hover:text-destructive transition-colors">
+              <button onClick={handleDelete} aria-label="Delete post" className="ml-auto text-muted-foreground hover:text-destructive transition-colors">
                 <Trash2 className="w-4 h-4" />
               </button>
             )}
@@ -210,6 +220,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
 
       <div className="flex items-center gap-1 px-4 py-2 flex-wrap">
         <button
+          aria-label={liked ? 'Unlike post' : 'Like post'}
           onClick={toggleLike}
           className={cn(
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
@@ -220,6 +231,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
           {likes > 0 && likes}
         </button>
         <button
+          aria-label="Comments"
           onClick={toggleComments}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:bg-secondary transition-all"
         >
@@ -227,6 +239,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
           {(post.comments_count || 0) > 0 && post.comments_count}
         </button>
         <button
+          aria-label="Repost"
           onClick={handleRepost}
           disabled={isOwner || reposted}
           className={cn(
@@ -242,6 +255,7 @@ export default function PostCard({ post, author, onDeleted, onReposted }) {
           <ReactionBar postId={post.id} />
           <button
             onClick={handleShare}
+            aria-label="Share post"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:bg-secondary transition-all"
           >
             <Share2 className="w-4 h-4" />

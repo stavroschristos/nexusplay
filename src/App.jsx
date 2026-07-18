@@ -45,6 +45,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import { Navigate } from 'react-router-dom';
 import InviteLanding from '@/pages/InviteLanding';
+import Search from '@/pages/Search';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -93,6 +94,7 @@ const AuthenticatedApp = () => {
         <Route element={<Layout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />

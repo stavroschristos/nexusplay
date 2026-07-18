@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { base44 } from '@/api/base44Client';
 import { trackPageView } from '@/lib/analytics';
-import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X, Rocket } from 'lucide-react';
+import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X, Rocket, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FeedbackWidget from '@/components/feedback/FeedbackWidget';
 
@@ -12,6 +12,7 @@ const navGroups = [
   {
     items: [
       { icon: Home, label: 'Home', path: '/home' },
+      { icon: Search, label: 'Search', path: '/search' },
       { icon: Radio, label: 'Gaming Radar', path: '/radar' },
       { icon: Compass, label: 'Discover', path: '/explore' },
     ],
@@ -36,6 +37,7 @@ const navGroups = [
 
 const mobileNavItems = [
   { icon: Home, label: 'Home', path: '/home' },
+  { icon: Search, label: 'Search', path: '/search' },
   { icon: Compass, label: 'Discover', path: '/explore' },
   { icon: Trophy, label: 'Profile', path: '/profile' },
   { icon: MessagesSquare, label: 'Messages', path: '/messages' },
@@ -107,6 +109,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:shadow-lg">Skip to content</a>
       <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 glass border-r border-border z-40">
         <div className="flex items-center gap-2.5 px-6 py-6">
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center glow">
@@ -150,7 +153,7 @@ export default function Layout() {
         </div>
       </nav>
 
-      <main className="flex-1 md:ml-64 pb-20 md:pb-0">
+      <main id="main-content" className="flex-1 md:ml-64 pb-20 md:pb-0">
         {announcement && !announcementDismissed && (
           <div className={`mx-4 mt-4 p-3 rounded-xl border flex items-start gap-3 animate-slide-up ${ANNOUNCEMENT_STYLES[announcement.type] || ANNOUNCEMENT_STYLES.info}`}>
             <Megaphone className="w-5 h-5 shrink-0 mt-0.5" />

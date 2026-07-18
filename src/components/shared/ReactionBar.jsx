@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 import { SmilePlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -8,43 +9,49 @@ const REACTIONS = ['🔥', '👏', '🎮', '🏆', '😮', '❤️'];
 
 export default function ReactionBar({ postId }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [reactions, setReactions] = useState({});
   const [myReaction, setMyReaction] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
   const [myReactionId, setMyReactionId] = useState(null);
 
-  useEffect(() => {
-    base44.entities.Reaction.filter({ post_id: postId }).then((all) => {
+  const load = useCallback(async () => {
+    try {
+      const all = await base44.entities.Reaction.filter({ post_id: postId });
       const map = {};
       all.forEach((r) => {
         map[r.emoji] = (map[r.emoji] || 0) + 1;
-        if (r.created_by_id === user?.id) {
-          setMyReaction(r.emoji);
-          setMyReactionId(r.id);
-        }
+        if (r.created_by_id === user?.id) { setMyReaction(r.emoji); setMyReactionId(r.id); }
       });
       setReactions(map);
-    }).catch(() => {});
+    } catch {}
   }, [postId, user?.id]);
 
+  useEffect(() => { load(); }, [load]);
+
   const react = async (emoji) => {
-    if (myReaction === emoji) {
-      // Remove reaction
-      if (myReactionId) await base44.entities.Reaction.delete(myReactionId);
-      setReactions((r) => ({ ...r, [emoji]: Math.max(0, (r[emoji] || 1) - 1) }));
-      setMyReaction(null);
-      setMyReactionId(null);
-    } else {
-      if (myReactionId) {
-        await base44.entities.Reaction.delete(myReactionId);
-        setReactions((r) => ({ ...r, [myReaction]: Math.max(0, (r[myReaction] || 1) - 1) }));
+    const prevReaction = myReaction;
+    const prevId = myReactionId;
+    try {
+      if (prevReaction === emoji) {
+        setMyReaction(null); setMyReactionId(null);
+        setReactions((r) => ({ ...r, [emoji]: Math.max(0, (r[emoji] || 1) - 1) }));
+        if (prevId) await base44.entities.Reaction.delete(prevId);
+      } else {
+        if (prevId) {
+          await base44.entities.Reaction.delete(prevId);
+          setReactions((r) => ({ ...r, [prevReaction]: Math.max(0, (r[prevReaction] || 1) - 1) }));
+        }
+        const r = await base44.entities.Reaction.create({ post_id: postId, emoji });
+        setReactions((prev) => ({ ...prev, [emoji]: (prev[emoji] || 0) + 1 }));
+        setMyReaction(emoji);
+        setMyReactionId(r.id);
       }
-      const r = await base44.entities.Reaction.create({ post_id: postId, emoji });
-      setReactions((prev) => ({ ...prev, [emoji]: (prev[emoji] || 0) + 1 }));
-      setMyReaction(emoji);
-      setMyReactionId(r.id);
+      setShowPicker(false);
+    } catch {
+      toast({ title: 'Failed to react', variant: 'destructive' });
+      load();
     }
-    setShowPicker(false);
   };
 
   const activeEmojis = Object.keys(reactions).filter((e) => reactions[e] > 0);
@@ -55,6 +62,7 @@ export default function ReactionBar({ postId }) {
         <button
           key={emoji}
           onClick={() => react(emoji)}
+          aria-label={`${emoji} reaction, ${reactions[emoji]}`}
           className={cn(
             'flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all',
             myReaction === emoji ? 'bg-primary/20 ring-1 ring-primary' : 'bg-secondary/50 hover:bg-secondary'
@@ -66,6 +74,7 @@ export default function ReactionBar({ postId }) {
       ))}
       <button
         onClick={() => setShowPicker(!showPicker)}
+        aria-label="Add a reaction"
         className="p-1.5 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
       >
         <SmilePlus className="w-4 h-4" />
@@ -76,6 +85,7 @@ export default function ReactionBar({ postId }) {
             <button
               key={emoji}
               onClick={() => react(emoji)}
+              aria-label={`React with ${emoji}`}
               className="w-8 h-8 rounded-lg hover:bg-secondary text-lg transition-colors"
             >
               {emoji}

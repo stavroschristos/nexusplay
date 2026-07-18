@@ -30,7 +30,7 @@ export default function GameDetail() {
     if (!id) return;
     Promise.all([
       base44.entities.Game.list(),
-      base44.entities.Post.filter({ game_id: id }, '-created_date', 50),
+      base44.entities.Post.filter({ game_id: id, hidden: { $ne: true } }, '-created_date', 50),
       base44.entities.GameReview.filter({ game_id: id }, '-created_date', 50),
       base44.entities.GameFollow.filter({ game_id: id, created_by_id: user?.id }),
     ]).then(async ([games, gamePosts, gameReviews, follows]) => {

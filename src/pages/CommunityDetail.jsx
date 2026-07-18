@@ -22,7 +22,7 @@ export default function CommunityDetail() {
     if (!id) return;
     Promise.all([
       base44.entities.Community.list(),
-      base44.entities.Post.filter({ community_id: id }, '-created_date', 50),
+      base44.entities.Post.filter({ community_id: id, hidden: { $ne: true } }, '-created_date', 50),
       base44.entities.CommunityMember.filter({ community_id: id, created_by_id: user?.id }),
       base44.entities.CommunityMember.filter({ community_id: id }),
     ]).then(async ([comms, commPosts, myMembership, members]) => {

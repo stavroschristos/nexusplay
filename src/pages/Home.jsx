@@ -33,9 +33,9 @@ export default function Home() {
     try {
       let res;
       if (feedFilter === 'activities') {
-        res = await base44.entities.Post.filter({ type: 'activity' }, '-created_date', 20);
+        res = await base44.entities.Post.filter({ type: 'activity', hidden: { $ne: true } }, '-created_date', 20);
       } else {
-        res = await base44.entities.Post.list('-created_date', 20);
+        res = await base44.entities.Post.filter({ hidden: { $ne: true } }, '-created_date', 20);
       }
       setPosts(res);
       const authorIds = [...new Set(res.map((p) => p.created_by_id))];

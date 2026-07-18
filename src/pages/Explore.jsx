@@ -60,7 +60,7 @@ export default function Explore() {
       base44.entities.Community.list('-members_count', 50),
       base44.entities.Game.list('-created_date', 100),
       base44.entities.GameReview.list('-created_date', 200),
-      base44.entities.Post.list('-created_date', 200),
+      base44.entities.Post.filter({ hidden: { $ne: true } }, '-created_date', 200),
     ]).then(([allUsers, allAccounts, follows, comms, allGames, reviews, posts]) => {
       setUsers(allUsers.filter((u) => u.id !== currentUser?.id && (u.privacy_profile || 'public') !== 'private'));
       const accMap = {};
