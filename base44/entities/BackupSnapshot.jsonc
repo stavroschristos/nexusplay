@@ -1,0 +1,68 @@
+{
+  "name": "BackupSnapshot",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the backup snapshot was taken"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "manual"
+      ],
+      "default": "scheduled",
+      "description": "Whether the snapshot ran on schedule or was triggered manually"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "partial",
+        "failed"
+      ],
+      "default": "success",
+      "description": "Overall outcome of the snapshot"
+    },
+    "entities": {
+      "type": "object",
+      "description": "Map of entity name to record count (capped per entity)"
+    },
+    "total_records": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of record counts across all entities"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Summary or error details from the snapshot run"
+    }
+  },
+  "required": [
+    "timestamp"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

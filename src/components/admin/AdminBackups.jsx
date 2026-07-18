@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { logAdminAction } from '@/lib/admin-audit';
 import { Card } from '@/components/ui/card';
@@ -38,6 +38,15 @@ export default function AdminBackups() {
   const { toast } = useToast();
   const [busy, setBusy] = useState(null);
   const [lastBackup, setLastBackup] = useState(localStorage.getItem('np_last_backup'));
+  const [snapshots, setSnapshots] = useState([]);
+  const [loadingSnapshots, setLoadingSnapshots] = useState(true);
+
+  useEffect(() => {
+    base44.entities.BackupSnapshot.list('-timestamp', 10)
+      .then(setSnapshots)
+      .catch(() => {})
+      .finally(() => setLoadingSnapshots(false));
+  }, []);
 
   const exportEntity = async (entity, label) => {
     setBusy(entity);
@@ -111,10 +120,31 @@ export default function AdminBackups() {
       </div>
 
       <Card className="p-4 bg-card/50 border-border">
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Scheduled Backup History</h3>
+        {loadingSnapshots ? (
+          <p className="text-xs text-muted-foreground">Loading…</p>
+        ) : snapshots.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No automated snapshots yet. The nightly workflow runs at 3:00 AM ET.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {snapshots.map((s) => (
+              <div key={s.id} className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{new Date(s.timestamp).toLocaleString()}</span>
+                <span className="flex items-center gap-2">
+                  <Badge variant="outline" className={s.status === 'success' ? 'text-emerald-400 border-emerald-500/30' : s.status === 'partial' ? 'text-amber-400 border-amber-500/30' : 'text-red-400 border-red-500/30'}>{s.status}</Badge>
+                  <span className="font-mono text-muted-foreground">{s.total_records || 0} records</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-4 bg-card/50 border-border">
         <h3 className="text-sm font-semibold mb-2 flex items-center gap-2"><Info className="w-4 h-4 text-primary" /> How Backups &amp; Restores Work</h3>
         <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
           <li><strong>Manual backup:</strong> Click "Full Backup" or export individual entities above. Each downloads a JSON snapshot.</li>
-          <li><strong>Scheduled backups:</strong> Foundation is in place — a scheduled workflow can call the export endpoint to run nightly and store results. Configure via Workflows with a schedule trigger (next step).</li>
+          <li><strong>Scheduled backups:</strong> The <strong>Nightly Backup</strong> workflow runs automatically at 3:00 AM ET, snapshotting record counts for all entities into the history above. Full data exports are still done manually below.</li>
           <li><strong>Restore:</strong> Use the platform's CSV/JSON import tool to load a backup file back into the matching entity. Restores append records (they do not overwrite by id) — use after clearing a target collection for true replacement.</li>
           <li><strong>PII caution:</strong> User and Message exports contain private data. Treat backups as sensitive and store them under access control.</li>
         </ul>
