@@ -66,9 +66,53 @@
     "quote_content": {
       "type": "string",
       "description": "Commentary added to a quote post"
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an admin hid this post from public feeds"
+    },
+    "hidden_reason": {
+      "type": "string",
+      "description": "Reason the post was hidden"
+    },
+    "hidden_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the post was hidden"
     }
   },
   "required": [
     "content"
-  ]
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Gamepad2 } from 'lucide-react';
 
 const cols = [
-  { title: 'Platform', links: [['About', '#'], ['Careers', '#'], ['Blog', '#'], ['Contact', '#']] },
+  { title: 'Platform', links: [['About', '#'], ['Careers', '#'], ['Blog', '#'], ['System Status', '/status'], ['Contact', '#']] },
   { title: 'Legal', links: [['Security', '/security'], ['Privacy Policy', '/privacy'], ['Terms of Service', '/terms'], ['Community Guidelines', '/guidelines'], ['Cookie Policy', '/cookies'], ['Data Usage', '/data-usage']] },
   { title: 'Community', links: [['Communities', '#'], ['Games', '#'], ['Gaming Radar', '#'], ['Gaming Wrapped', '#']] },
 ];

@@ -1,0 +1,81 @@
+{
+  "name": "FeatureFlag",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Unique stable identifier (e.g. ai_assistant, marketplace)"
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-friendly display name"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this feature flag controls"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the feature is on"
+    },
+    "release_status": {
+      "type": "string",
+      "enum": [
+        "stable",
+        "beta",
+        "alpha",
+        "internal",
+        "deprecated"
+      ],
+      "default": "beta",
+      "description": "Release maturity of the feature"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "global",
+        "alpha_testers",
+        "admins"
+      ],
+      "default": "global",
+      "description": "Who sees the feature when enabled"
+    },
+    "category": {
+      "type": "string",
+      "default": "general",
+      "description": "Grouping for the admin manager"
+    },
+    "last_modified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the flag was last changed"
+    },
+    "modified_by": {
+      "type": "string",
+      "description": "Admin display name who last changed it (denormalized)"
+    }
+  },
+  "required": [
+    "key",
+    "label"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

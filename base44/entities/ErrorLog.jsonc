@@ -1,0 +1,119 @@
+{
+  "name": "ErrorLog",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the error occurred (explicit, for filtering)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "frontend",
+        "backend",
+        "api",
+        "auth",
+        "integration",
+        "database",
+        "system",
+        "upload",
+        "search",
+        "notification"
+      ],
+      "default": "frontend",
+      "description": "Where the error originated"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "debug",
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ],
+      "default": "error",
+      "description": "Error severity level"
+    },
+    "error_type": {
+      "type": "string",
+      "description": "Short error category (e.g. window_error, fetch_failure, auth_failure)"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Human-readable error message"
+    },
+    "stack_trace": {
+      "type": "string",
+      "description": "Truncated stack trace when available"
+    },
+    "page_url": {
+      "type": "string",
+      "description": "Full URL where the error occurred"
+    },
+    "page_path": {
+      "type": "string",
+      "description": "Path where the error occurred"
+    },
+    "feature": {
+      "type": "string",
+      "description": "Feature area being used (home, messaging, communities, etc.)"
+    },
+    "browser": {
+      "type": "string",
+      "description": "Browser type"
+    },
+    "os": {
+      "type": "string",
+      "description": "Operating system"
+    },
+    "device_type": {
+      "type": "string",
+      "description": "Desktop, Mobile, or Tablet"
+    },
+    "app_version": {
+      "type": "string",
+      "description": "App version at time of error"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Anonymous session identifier"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Authenticated user id (never email/name)"
+    },
+    "context": {
+      "type": "object",
+      "description": "Sanitized extra context (passwords/tokens/emails stripped)"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an admin marked this error reviewed/resolved"
+    }
+  },
+  "required": [
+    "error_type",
+    "error_message"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { LayoutDashboard, Gamepad2, Flag, BarChart3, Settings as SettingsIcon, ShieldAlert, UserCheck, MessageSquare, Crown, Gift, LineChart } from 'lucide-react';
+import { LayoutDashboard, Gamepad2, Flag, BarChart3, Settings as SettingsIcon, ShieldAlert, UserCheck, MessageSquare, Crown, Gift, LineChart, Activity, Database } from 'lucide-react';
 import AdminOverview from '@/components/admin/AdminOverview';
 import AdminGaming from '@/components/admin/AdminGaming';
 import AdminModeration from '@/components/admin/AdminModeration';
@@ -14,10 +14,17 @@ import AdminNotifications from '@/components/admin/AdminNotifications';
 import AdminInvites from '@/components/admin/AdminInvites';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminFounder from '@/components/admin/AdminFounder';
+import AdminHealth from '@/components/admin/AdminHealth';
+import AdminObservability from '@/components/admin/AdminObservability';
+import AdminFeatureFlags from '@/components/admin/AdminFeatureFlags';
+import AdminBackups from '@/components/admin/AdminBackups';
+import AdminReports from '@/components/admin/AdminReports';
 import { Bell } from 'lucide-react';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { key: 'health', label: 'Health', icon: Activity },
+  { key: 'observability', label: 'Observability', icon: BarChart3 },
   { key: 'gaming', label: 'Gaming', icon: Gamepad2 },
   { key: 'moderation', label: 'Moderation', icon: Flag },
   { key: 'registration', label: 'Registration', icon: UserCheck },
@@ -27,6 +34,9 @@ const TABS = [
   { key: 'analytics', label: 'Analytics', icon: LineChart },
   { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'features', label: 'Features', icon: BarChart3 },
+  { key: 'featureflags', label: 'Flags', icon: Flag },
+  { key: 'reports', label: 'Reports', icon: LineChart },
+  { key: 'backups', label: 'Backups', icon: Database },
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -76,9 +86,14 @@ export default function Admin() {
       </div>
 
       {tab === 'overview' && <AdminOverview />}
+      {tab === 'health' && <AdminHealth />}
+      {tab === 'observability' && <AdminObservability />}
       {tab === 'gaming' && <AdminGaming />}
       {tab === 'moderation' && <AdminModeration />}
       {tab === 'features' && <AdminFeatures />}
+      {tab === 'featureflags' && <AdminFeatureFlags />}
+      {tab === 'reports' && <AdminReports />}
+      {tab === 'backups' && <AdminBackups />}
       {tab === 'registration' && <AdminRegistration />}
       {tab === 'feedback' && <AdminFeedback />}
       {tab === 'invites' && <AdminInvites />}

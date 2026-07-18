@@ -1,0 +1,67 @@
+{
+  "name": "SystemStatus",
+  "type": "object",
+  "properties": {
+    "service": {
+      "type": "string",
+      "description": "Service identifier (authentication, database, api, etc.)"
+    },
+    "label": {
+      "type": "string",
+      "description": "Display name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "degraded",
+        "partial_outage",
+        "maintenance",
+        "offline"
+      ],
+      "default": "operational",
+      "description": "Current public status"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optional status note shown on the public status page"
+    },
+    "auto": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether status is auto-derived from error logs or manually set"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the status was last updated"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display order on the status page"
+    }
+  },
+  "required": [
+    "service",
+    "label"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

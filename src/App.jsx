@@ -3,6 +3,9 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
+import { useEffect } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { setLoggerUser } from '@/lib/error-logger';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
@@ -35,6 +38,7 @@ import CommunityGuidelines from '@/pages/CommunityGuidelines';
 import DataUsage from '@/pages/DataUsage';
 import CookiePolicy from '@/pages/CookiePolicy';
 import Security from '@/pages/Security';
+import Status from '@/pages/Status';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -44,7 +48,9 @@ import InviteLanding from '@/pages/InviteLanding';
 // Add page imports here
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+
+  useEffect(() => { setLoggerUser(user?.id || null); }, [user]);
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -80,6 +86,7 @@ const AuthenticatedApp = () => {
       <Route path="/data-usage" element={<DataUsage />} />
       <Route path="/cookies" element={<CookiePolicy />} />
       <Route path="/security" element={<Security />} />
+      <Route path="/status" element={<Status />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
@@ -119,7 +126,9 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <AuthenticatedApp />
+          <ErrorBoundary>
+            <AuthenticatedApp />
+          </ErrorBoundary>
         </Router>
         <Toaster />
       </QueryClientProvider>
