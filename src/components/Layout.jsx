@@ -7,6 +7,7 @@ import { trackPageView } from '@/lib/analytics';
 import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X, Rocket, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FeedbackWidget from '@/components/feedback/FeedbackWidget';
+import { usePresence } from '@/hooks/usePresence';
 
 const navGroups = [
   {
@@ -46,6 +47,7 @@ const mobileNavItems = [
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  usePresence();
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
   const [announcement, setAnnouncement] = useState(null);

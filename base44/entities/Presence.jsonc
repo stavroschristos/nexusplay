@@ -1,0 +1,69 @@
+{
+  "name": "Presence",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user this presence record belongs to"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name (denormalized for the radar)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "offline"
+      ],
+      "default": "online",
+      "description": "Session status driven by the heartbeat"
+    },
+    "current_game": {
+      "type": "string",
+      "description": "Game the user has manually marked as now playing"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Platform the user is currently playing on (user-set)"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the most recent heartbeat"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
