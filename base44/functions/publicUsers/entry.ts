@@ -37,17 +37,32 @@ Deno.serve(async (req) => {
     }
     const action = payload?.action;
 
+    // Use the service role so we can read ANY user record (built-in User RLS only
+    // lets admins read other users). Sensitive fields are stripped before returning.
     if (action === 'list') {
-      const users = await base44.entities.User.list();
+      const users = await base44.asServiceRole.entities.User.list('-created_date', 500);
       return Response.json({ users: users.map(sanitize) });
     }
 
     if (action === 'get') {
+      const ids = payload?.ids;
+      if (Array.isArray(ids) && ids.length > 0) {
+        const found = {};
+        for (const id of ids) {
+          try {
+            const u = await base44.asServiceRole.entities.User.get(id);
+            if (u) found[id] = sanitize(u);
+          } catch {
+            found[id] = null;
+          }
+        }
+        return Response.json({ users: found });
+      }
       const id = payload?.id;
       if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
       let target = null;
       try {
-        target = await base44.entities.User.get(id);
+        target = await base44.asServiceRole.entities.User.get(id);
       } catch {
         target = null;
       }
