@@ -46,6 +46,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import { Navigate } from 'react-router-dom';
 import InviteLanding from '@/pages/InviteLanding';
 import Search from '@/pages/Search';
+import Changelog from '@/pages/Changelog';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -108,6 +109,7 @@ const AuthenticatedApp = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/wrapped" element={<Wrapped />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/changelog" element={<Changelog />} />
           <Route path="/radar" element={<Radar />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/assistant" element={<Assistant />} />

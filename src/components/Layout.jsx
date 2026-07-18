@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { base44 } from '@/api/base44Client';
 import { trackPageView } from '@/lib/analytics';
-import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X, Rocket, Search } from 'lucide-react';
+import { Gamepad2, Home, Compass, Settings, LogOut, Trophy, MessagesSquare, Users, Gamepad, Flame, Bell, Radio, Target, Sparkles, ShieldAlert, Megaphone, X, Rocket, Search, GitBranch } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FeedbackWidget from '@/components/feedback/FeedbackWidget';
 import { usePresence } from '@/hooks/usePresence';
@@ -31,6 +31,7 @@ const navGroups = [
       { icon: MessagesSquare, label: 'Messages', path: '/messages' },
       { icon: Flame, label: 'Wrapped', path: '/wrapped' },
       { icon: Rocket, label: 'Roadmap', path: '/roadmap' },
+      { icon: GitBranch, label: 'Changelog', path: '/changelog' },
       { icon: Trophy, label: 'My Profile', path: '/profile' },
     ],
   },
