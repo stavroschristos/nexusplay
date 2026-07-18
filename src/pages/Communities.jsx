@@ -86,7 +86,7 @@ export default function Communities() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      <PageHeader icon={Users} title="Communities" subtitle="Find your people and join the conversation">
+      <PageHeader icon={Users} title="Communities" subtitle="Find your people around shared games, not just servers">
         <Button variant="outline" size="sm" onClick={() => setShowForm(!showForm)} className="rounded-full">
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showForm ? 'Cancel' : 'Create'}
@@ -139,7 +139,7 @@ export default function Communities() {
         <EmptyState
           icon={Users}
           title={search ? 'No communities match your search' : 'No communities yet'}
-          description={search ? 'Try a different keyword or category.' : 'Be the first to create one for your favorite game or genre!'}
+          description={search ? 'Try a different keyword or category.' : 'Start one for your favorite game or genre — communities here form around what you actually play.'}
           action={!search && (
             <Button onClick={() => setShowForm(true)} className="rounded-full">
               <Plus className="w-4 h-4" /> Create Community

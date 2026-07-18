@@ -9,9 +9,9 @@ export default function GamingIdentity() {
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         <motion.div {...reveal}>
           <span className="text-sm font-semibold text-primary uppercase tracking-widest">Gaming Identity</span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold leading-tight">One profile for your entire gaming history.</h2>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold leading-tight">One identity for everything you've ever played.</h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            Build a living gaming profile that represents everything you've ever played, earned, and loved — across every console, PC storefront, and platform. Your trophy room, timeline, and personality, all in one place.
+            We don't replace your consoles or storefronts — we give them a home. Build a living profile that represents everything you've played, earned, and loved across every platform. Your trophy room, timeline, and personality, finally in one place you actually own.
           </p>
           <ul className="mt-6 space-y-3">
             {[

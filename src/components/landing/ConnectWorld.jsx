@@ -21,9 +21,9 @@ export default function ConnectWorld() {
       <div className="max-w-5xl mx-auto px-4 text-center">
         <motion.div {...reveal}>
           <span className="text-sm font-semibold text-primary uppercase tracking-widest">Connect Your Gaming World</span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold">One profile. Every platform.</h2>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold">The layer that connects your platforms.</h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            NexusPlay doesn't replace your gaming ecosystem — it unites it. Link your existing accounts and let your history flow into a single identity.
+            NexusPlay isn't a rival to Steam, Discord, or your console — it's the connective layer above them. Link the accounts you already have and let your history flow into a single identity you carry everywhere.
           </p>
         </motion.div>
 

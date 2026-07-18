@@ -17,8 +17,8 @@ export default function CommunitiesPreview() {
     <section id="communities" className="max-w-7xl mx-auto px-4 py-24">
       <motion.div {...reveal} className="text-center mb-12">
         <span className="text-sm font-semibold text-primary uppercase tracking-widest">Communities</span>
-        <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold">Find your people.</h2>
-        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">Join communities built around what you love. Preview a few before you even sign up.</p>
+        <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold">Find your people — around shared games, not just servers.</h2>
+        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">Communities here form around what you actually play. Meet gamers who share your taste across every platform. Preview a few before you even sign up.</p>
       </motion.div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

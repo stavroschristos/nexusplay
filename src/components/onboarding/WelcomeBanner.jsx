@@ -41,7 +41,7 @@ export default function WelcomeBanner({ user, onSeen }) {
         Let's build your gaming identity, <span className="text-primary text-glow">{name}</span>.
       </h2>
       <p className="text-sm text-muted-foreground mt-2 max-w-md">
-        Completing your profile unlocks the full experience — discovery, communities, your trophy room, and gamers who match your taste. It takes about two minutes.
+        NexusPlay connects the platforms you already use — your profile is the identity that ties them together. Complete it to unlock discovery, your trophy room, and gamers who match your taste. About two minutes.
       </p>
 
       <div className="flex flex-wrap gap-2 mt-5">

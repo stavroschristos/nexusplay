@@ -52,7 +52,7 @@ export default function SmartRecommendations({ user }) {
         <h3 className="text-sm font-semibold">Recommended for you</h3>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Because you selected <span className="text-primary font-medium">{genreText}</span>, here are games, communities and gamers you may enjoy.
+        Based on your taste in <span className="text-primary font-medium">{genreText}</span>, here are games, communities, and gamers matched to who you are as a gamer.
       </p>
 
       {data.games.length > 0 && (

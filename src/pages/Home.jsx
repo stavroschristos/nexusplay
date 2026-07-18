@@ -74,7 +74,7 @@ export default function Home() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[1fr_300px] gap-6">
       <div className="max-w-2xl w-full mx-auto lg:mx-0">
-        <PageHeader icon={Sparkles} title={user?.display_name ? `Hey, ${user.display_name.split(' ')[0]}` : 'Gamer Feed'} subtitle={view === 'dashboard' ? 'Your gaming world at a glance' : 'Latest activity from your network'} />
+        <PageHeader icon={Sparkles} title={user?.display_name ? `Hey, ${user.display_name.split(' ')[0]}` : 'Gamer Feed'} subtitle={view === 'dashboard' ? 'Your gaming identity, at a glance' : 'Activity from across your network'} />
 
         <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
           <button onClick={() => setView('dashboard')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5', view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
@@ -120,7 +120,7 @@ export default function Home() {
             {loading ? (
               <SkeletonFeed />
             ) : posts.length === 0 ? (
-              <EmptyState icon={Sparkles} title="No posts yet" description="Be the first to share something with the community!" />
+              <EmptyState icon={Sparkles} title="No posts yet" description="Share a milestone or thought — your feed is the social pulse of your gaming identity." />
             ) : (
               <div className="space-y-4 stagger">
                 {posts.map((post) => (
@@ -169,7 +169,7 @@ export default function Home() {
           <Link to={`/profile/${founder.id}`} className="block rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-fuchsia-500/5 p-4 hover:border-amber-500/50 transition-colors">
             <div className="mb-2"><FounderBadge /></div>
             <p className="text-sm font-semibold">{founder.display_name || 'The Founder'}</p>
-            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">See what a complete gaming identity looks like — the profile this platform was built around.</p>
+            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">See what a complete gaming identity looks like — every platform, every trophy, in one profile.</p>
           </Link>
         )}
       </aside>

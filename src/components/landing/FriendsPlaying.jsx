@@ -31,9 +31,9 @@ export default function FriendsPlaying() {
 
         <motion.div {...reveal} transition={{ delay: 0.1 }} className="order-1 lg:order-2">
           <span className="text-sm font-semibold text-primary uppercase tracking-widest">See What Friends Are Playing</span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold leading-tight">Never play alone.</h2>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold leading-tight">Your gaming world, in real time.</h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            A real-time social feed built for gamers. Watch your friends earn trophies, start streams, finish games, and find groups — all in one place. The social pulse of your gaming world.
+            Not a chat app — a feed built for gaming. See friends earn trophies, finish games, go live, and find groups across every platform they play on, all in one place. The social pulse of your identity.
           </p>
         </motion.div>
       </div>

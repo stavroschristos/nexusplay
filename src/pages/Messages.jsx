@@ -81,7 +81,7 @@ export default function Messages() {
               <EmptyState
                 icon={MessagesSquare}
                 title="No messages yet"
-                description="Start connecting with gamers who share your interests."
+                description="NexusPlay connects you with gamers who match your taste — start a conversation."
                 action={<Link to="/explore" className="inline-flex items-center gap-2 px-4 h-9 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Find Gamers</Link>}
               />
             ) : (

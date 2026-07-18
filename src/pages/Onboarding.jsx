@@ -20,9 +20,9 @@ const STEP_META = [
   { title: 'Your platforms', desc: 'Where do you play?' },
   { title: 'Your genres', desc: 'Pick at least 2' },
   { title: 'Your games', desc: 'What do you love?' },
-  { title: 'Connect accounts', desc: 'Optional' },
+  { title: 'Connect accounts', desc: 'Optional — link, don\'t replace' },
   { title: 'Your identity', desc: 'Generating…' },
-  { title: 'Recommendations', desc: 'For you' },
+  { title: 'Recommendations', desc: 'Tuned to your taste' },
 ];
 
 // Steps a user can skip without being blocked from the platform (non-critical).
@@ -114,7 +114,7 @@ export default function Onboarding() {
         localStorage.removeItem('nexus_invite_code');
       } catch { /* ignore */ }
       await checkUserAuth();
-      toast({ title: 'Welcome to NexusPlay! 🎮', description: 'Your gaming identity is ready.' });
+      toast({ title: 'Welcome to NexusPlay! 🎮', description: 'Your gaming identity is ready — now connect your platforms.' });
       setCelebrating(true);
     } catch (e) {
       toast({ title: 'Something went wrong', description: e.message, variant: 'destructive' });
@@ -187,7 +187,7 @@ export default function Onboarding() {
           <div className="max-w-md w-full text-center rounded-3xl border border-primary/30 bg-card/80 backdrop-blur-md p-8 shadow-2xl animate-scale-in">
             <div className="text-5xl mb-3">🎉</div>
             <h2 className="text-2xl font-heading font-bold">Your gaming identity is complete.</h2>
-            <p className="text-sm text-muted-foreground mt-2">You've unlocked your profile badge, XP, and personalized recommendations. Your gaming journey starts now.</p>
+            <p className="text-sm text-muted-foreground mt-2">You've unlocked your profile badge, XP, and recommendations tuned to your taste. Now link your platforms to bring your history together.</p>
             <div className="grid grid-cols-3 gap-2 mt-5 text-xs">
               <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">🏆</div>Profile badge</div>
               <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">⚡</div>XP earned</div>

@@ -21,7 +21,7 @@ export default function Games() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      <PageHeader icon={Gamepad2} title="Games" subtitle="Browse and discover your next favorite" />
+      <PageHeader icon={Gamepad2} title="Games" subtitle="Discover your next favorite — tuned to your taste" />
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -36,7 +36,7 @@ export default function Games() {
         <EmptyState
           icon={Gamepad2}
           title="No games found"
-          description={search ? `No games match "${search}"` : 'Games will appear here once added. In the meantime, explore what the community is playing.'}
+          description={search ? `No games match "${search}"` : 'Games appear here once added. In the meantime, explore what the community is playing across every platform.'}
           action={!search && (
             <Link to="/explore" className="inline-flex items-center gap-2 px-4 h-9 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">Explore Gamers</Link>
           )}

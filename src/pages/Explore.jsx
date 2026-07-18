@@ -166,7 +166,7 @@ export default function Explore() {
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
-        <PageHeader icon={Sparkles} title="Discover Your People" subtitle="Find gamers who match your style, library, and vibe" />
+        <PageHeader icon={Sparkles} title="Discover Your People" subtitle="Gamers and communities matched to your actual taste and library" />
         <div className="h-10 skeleton rounded-full mb-4" />
         <div className="flex gap-1.5 mb-6 overflow-hidden">
           {[...Array(5)].map((_, i) => <div key={i} className="skeleton rounded-full h-9 w-24 shrink-0" />)}
@@ -178,7 +178,7 @@ export default function Explore() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-20">
-      <PageHeader icon={Sparkles} title="Discover Your People" subtitle="Find gamers who match your style, library, and vibe" />
+      <PageHeader icon={Sparkles} title="Discover Your People" subtitle="Gamers and communities matched to your actual taste and library" />
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -224,7 +224,7 @@ export default function Explore() {
 
 function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, risingCreators, recentlyJoined, popularCommunities, trendingGames, accountsMap, followingIds, onToggleFollow, creatorStats }) {
   const renderGamerGrid = (list, showReasons = true) => {
-    if (list.length === 0) return <EmptyState icon={Users} title="No gamers found" description="Try updating your profile to get better matches!" />;
+    if (list.length === 0) return <EmptyState icon={Users} title="No gamers found yet" description="Complete your profile — favorite games and habits — so we can match you to gamers who share your taste." />;
     return (
       <div className="grid sm:grid-cols-2 gap-3 stagger">
         {list.map((d) => (
@@ -255,7 +255,7 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={Gamepad2} title="Shared Libraries" subtitle="Gamers who play the same games as you" />
-        {sharedLib.length === 0 ? <EmptyState icon={Gamepad2} title="No shared games yet" description="Add more favorite games in your profile settings to find matches!" /> : renderGamerGrid(sharedLib)}
+        {sharedLib.length === 0 ? <EmptyState icon={Gamepad2} title="No shared games yet" description="Add the games you love to your profile — we'll find gamers who play them too, across every platform." /> : renderGamerGrid(sharedLib)}
       </div>
     );
   }
@@ -264,7 +264,7 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
     return (
       <div className="space-y-4">
         <SectionHeader icon={Layers} title="Similar Gaming Habits" subtitle="Gamers who share your play style and habits" />
-        {habits.length === 0 ? <EmptyState icon={Layers} title="No habit matches yet" description="Set your gaming habits in profile settings to find like-minded gamers!" /> : renderGamerGrid(habits)}
+        {habits.length === 0 ? <EmptyState icon={Layers} title="No habit matches yet" description="Set your gaming habits in your profile to meet gamers who play the way you do." /> : renderGamerGrid(habits)}
       </div>
     );
   }
@@ -298,7 +298,7 @@ function TabContent({ tab, recommended, sharedLib, habits, achievers, trending, 
       <div className="space-y-4">
         <SectionHeader icon={Heart} title="Rising Creators" subtitle="Gamers creating the most engaging content" />
         {risingCreators.length === 0 ? (
-          <EmptyState icon={Heart} title="No creators yet" description="Be the first to share posts and activities!" />
+          <EmptyState icon={Heart} title="No creators yet" description="Share a post or milestone — your activity is what makes the community come alive." />
         ) : (
           <div className="grid sm:grid-cols-2 gap-3 stagger">
             {risingCreators.map((d) => {

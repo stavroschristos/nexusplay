@@ -28,10 +28,10 @@ export default function GamingWrapped() {
         </motion.div>
 
         <motion.div {...reveal} className="order-1 lg:order-2">
-          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Gaming Wrapped</span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold leading-tight">Your year in gaming, beautifully summarized.</h2>
+          <span className="text-sm font-semibold text-primary uppercase tracking-widest">Gaming Memories</span>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold leading-tight">Your gaming journey, preserved.</h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            Get personalized gaming insights and shareable summaries throughout the year. See your most-played games, rarest trophies, gaming streaks, and personality breakdown — then share it with the world.
+            Achievements vanish inside each platform's walled garden. Here they live together. Get shareable recaps of your most-played games, rarest trophies, and streaks — the story of who you are as a gamer, across every platform, kept forever.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             {['Yearly Recap', 'Monthly Digests', 'Shareable Cards', 'Personality Insights'].map((t) => (

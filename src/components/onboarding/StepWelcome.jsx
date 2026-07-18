@@ -5,7 +5,7 @@ const perks = [
   { icon: Trophy, text: 'Showcase every achievement' },
   { icon: Users, text: 'Find your gaming community' },
   { icon: Radio, text: 'See who is playing, now' },
-  { icon: Sparkles, text: 'Personalized recommendations' },
+  { icon: Sparkles, text: 'Discovery tuned to your taste' },
 ];
 
 export default function StepWelcome({ name }) {
@@ -16,7 +16,7 @@ export default function StepWelcome({ name }) {
         <Gamepad2 className="w-10 h-10 text-white" />
       </motion.div>
       <h2 className="font-heading font-bold text-2xl">{name ? `Welcome, ${name}!` : 'Welcome to NexusPlay'}</h2>
-      <p className="text-muted-foreground mt-2 max-w-sm mx-auto">Let's build your gaming identity. Answer a few quick questions and we'll tailor your entire experience — it takes under a minute.</p>
+      <p className="text-muted-foreground mt-2 max-w-sm mx-auto">Let's build your gaming identity — the layer that connects your platforms. Answer a few quick questions and we'll tune discovery to your actual taste. It takes under a minute.</p>
       <div className="grid grid-cols-2 gap-3 mt-7 text-left">
         {perks.map((p, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08 }}

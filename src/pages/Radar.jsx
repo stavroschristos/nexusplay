@@ -212,7 +212,7 @@ export default function Radar() {
           )}
 
           {filtered.length === 0 ? (
-            <EmptyState icon={Users} title="No one here yet" description={radar.length === 0 ? "Follow some gamers to see them on your radar!" : "No friends match this filter right now."} action={radar.length === 0 ? <Link to="/explore" className="inline-block mt-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium">Discover Gamers</Link> : null} />
+            <EmptyState icon={Users} title="No one here yet" description={radar.length === 0 ? "Follow some gamers to see them on your radar — across every platform they play on." : "No friends match this filter right now."} action={radar.length === 0 ? <Link to="/explore" className="inline-block mt-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium">Discover Gamers</Link> : null} />
           ) : (
             <div className="space-y-3 stagger">
               {filtered.map((p) => (
