@@ -101,7 +101,7 @@ export default function Radar() {
     return { user: u, status, game, platform, mins, streaming: !!liveStream, lfg: hasOpenLFG, isOnline, lastSeenMs };
   };
 
-  const followedIds = follows.map((f) => f.following_id);
+  const followedIds = [...new Set(follows.map((f) => f.following_id))];
   const radar = followedIds.map(compute).filter((r) => r.user);
 
   const myPresence = presenceByUser[user?.id];
