@@ -16,14 +16,16 @@ export default function StepGenerate({ selections, onGenerated, profile }) {
 
     (async () => {
       try {
+        const personalityLine = selections.personality ? `Self-identified personality: ${selections.personality}` : 'none yet';
         const prompt = `You are generating a gamer identity for a new user. Based on these preferences:
 Platforms: ${selections.platforms.join(', ') || 'none yet'}
 Genres: ${selections.genres.join(', ') || 'none yet'}
 Favorite games: ${selections.games.join(', ') || 'none yet'}
+${personalityLine}
 
 Write a punchy gaming identity. Respond as JSON:
 { "archetype": "a combined archetype label like 'The Completionist Explorer' (max 4 words)",
-  "personality": "one of: The Completionist, The Explorer, The Competitor, The Story Lover",
+  "personality": "${selections.personality || 'one of: The Completionist, The Explorer, The Competitor, The Story Lover'}",
   "summary": "2 fun sentences in second person ('You are…') describing this gamer's vibe based on their taste" }`;
         const res = await base44.integrations.Core.InvokeLLM({
           prompt,
@@ -36,7 +38,7 @@ Write a punchy gaming identity. Respond as JSON:
             },
           },
         });
-        if (!cancelled) onGenerated(res);
+        if (!cancelled) onGenerated(selections.personality ? { ...res, personality: selections.personality } : res);
       } catch (e) {
         if (!cancelled) {
           setError('Could not generate — you can continue anyway.');

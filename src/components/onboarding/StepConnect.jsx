@@ -1,14 +1,19 @@
 import { Plus, Trash2 } from 'lucide-react';
+import StepPlatforms from './StepPlatforms';
 
 const PLATFORMS = ['PlayStation', 'Xbox', 'Steam', 'Nintendo', 'Epic Games', 'Riot', 'Battle.net', 'Twitch'];
 
-export default function StepConnect({ accounts, setAccounts }) {
+export default function StepConnect({ platforms, togglePlatform, accounts, setAccounts }) {
   const update = (i, field, val) => setAccounts((a) => a.map((x, j) => (j === i ? { ...x, [field]: val } : x)));
   const remove = (i) => setAccounts((a) => a.filter((_, j) => j !== i));
   const add = () => setAccounts((a) => [...a, { platform: 'Steam', username: '' }]);
 
   return (
     <div>
+      <p className="text-sm font-medium mb-2">Which platforms do you play on?</p>
+      <StepPlatforms value={platforms} toggle={togglePlatform} />
+      <div className="border-t border-border my-5" />
+      <p className="text-sm font-medium mb-2">Link your accounts (optional)</p>
       <div className="space-y-3">
         {accounts.map((acc, i) => (
           <div key={i} className="flex gap-2">

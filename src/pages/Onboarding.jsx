@@ -6,37 +6,42 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Gamepad2, Check, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import StepWelcome from '@/components/onboarding/StepWelcome';
-import StepPlatforms from '@/components/onboarding/StepPlatforms';
-import StepGenres from '@/components/onboarding/StepGenres';
+import StepUsername from '@/components/onboarding/StepUsername';
+import StepAvatar from '@/components/onboarding/StepAvatar';
+import StepBanner from '@/components/onboarding/StepBanner';
 import StepGames from '@/components/onboarding/StepGames';
+import StepGenres from '@/components/onboarding/StepGenres';
+import StepBio from '@/components/onboarding/StepBio';
+import StepPersonality from '@/components/onboarding/StepPersonality';
 import StepConnect from '@/components/onboarding/StepConnect';
 import StepGenerate from '@/components/onboarding/StepGenerate';
-import StepRecommend from '@/components/onboarding/StepRecommend';
 import { trackJourney } from '@/lib/journey';
 import { markRegistered } from '@/lib/invites';
 
 const STEP_META = [
-  { title: 'Welcome', desc: 'Let\'s get started' },
-  { title: 'Your platforms', desc: 'Where do you play?' },
-  { title: 'Your genres', desc: 'Pick at least 2' },
+  { title: 'Welcome', desc: "Let's build your identity" },
+  { title: 'Your username', desc: 'Choose your handle' },
+  { title: 'Profile picture', desc: 'Optional — add later' },
+  { title: 'Profile banner', desc: 'Optional — set the vibe' },
   { title: 'Your games', desc: 'What do you love?' },
-  { title: 'Connect accounts', desc: 'Optional — link, don\'t replace' },
+  { title: 'Your genres', desc: 'Pick at least 2' },
+  { title: 'Your bio', desc: 'Optional — tell your story' },
+  { title: 'Your personality', desc: 'What kind of gamer are you?' },
+  { title: 'Connect platforms', desc: 'Optional — link, don\'t replace' },
   { title: 'Your identity', desc: 'Generating…' },
-  { title: 'Recommendations', desc: 'Tuned to your taste' },
 ];
 
-// Steps a user can skip without being blocked from the platform (non-critical).
-const SKIPPABLE = new Set([1, 2, 3, 4, 5]);
+// Steps a user can skip without being blocked (non-critical).
+const SKIPPABLE = new Set([2, 3, 6, 8]);
 
-// Derive the first incomplete step from already-saved profile data so returning
-// users resume exactly where they left off.
+// Resume at the first incomplete REQUIRED step; optionals are skipped over.
 function computeResumeStep(u) {
   if (!u) return 1;
-  if (!u.platforms_owned?.length) return 1;
-  if (!u.favorite_genres?.length || u.favorite_genres.length < 2) return 2;
-  if (!u.favorite_games?.length) return 3;
-  if (!u.gaming_personality) return 5; // skip optional connect step on resume
-  return 6;
+  if (!u.display_name?.trim()) return 1;
+  if (!u.favorite_games?.length) return 4;
+  if (!u.favorite_genres?.length || u.favorite_genres.length < 2) return 5;
+  if (!u.gaming_personality) return 7;
+  return 9;
 }
 
 export default function Onboarding() {
@@ -44,20 +49,29 @@ export default function Onboarding() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [bannerUrl, setBannerUrl] = useState('');
   const [platforms, setPlatforms] = useState([]);
   const [genres, setGenres] = useState([]);
   const [games, setGames] = useState([]);
+  const [bio, setBio] = useState('');
+  const [personality, setPersonality] = useState('');
   const [accounts, setAccounts] = useState([{ platform: 'PlayStation', username: '' }]);
   const [profile, setProfile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
 
   useEffect(() => {
-    // Hydrate any previously-saved selections so users resume where they left off.
     if (user) {
+      setUsername(user.display_name || '');
+      setAvatarUrl(user.avatar_url || '');
+      setBannerUrl(user.banner_url || '');
       setPlatforms(user.platforms_owned || []);
       setGenres(user.favorite_genres || []);
       setGames(user.favorite_games || []);
+      setBio(user.bio || '');
+      setPersonality(user.gaming_personality || '');
       if (user.onboarding_started && !user.has_onboarded) {
         setStep(computeResumeStep(user));
       }
@@ -70,33 +84,47 @@ export default function Onboarding() {
 
   const canProceed = [
     true,
-    platforms.length > 0,
-    genres.length >= 2,
+    username.trim().length > 0,
+    true,
+    true,
     games.length > 0,
+    genres.length >= 2,
+    true,
+    !!personality,
     true,
     !!profile,
-    true,
   ][step];
 
-  // Persist partial progress so a returning user never loses their place.
+  // Persist accumulated identity so a returning user never loses their place.
   const saveProgress = async () => {
     try {
       await base44.auth.updateMe({
+        display_name: username.trim(),
+        avatar_url: avatarUrl,
+        banner_url: bannerUrl,
         platforms_owned: platforms,
         favorite_genres: genres,
         favorite_games: games,
+        bio,
+        gaming_personality: personality,
       });
     } catch { /* ignore — progress is best-effort */ }
   };
+
+  const next = () => { saveProgress(); setStep(step + 1); };
 
   const finish = async () => {
     setSaving(true);
     try {
       await base44.auth.updateMe({
+        display_name: username.trim(),
+        avatar_url: avatarUrl,
+        banner_url: bannerUrl,
         platforms_owned: platforms,
         favorite_genres: genres,
         favorite_games: games,
-        gaming_personality: profile?.personality || '',
+        bio,
+        gaming_personality: personality,
         identity_archetype: profile?.archetype || '',
         identity_summary: profile?.summary || '',
         has_onboarded: true,
@@ -114,7 +142,6 @@ export default function Onboarding() {
         localStorage.removeItem('nexus_invite_code');
       } catch { /* ignore */ }
       await checkUserAuth();
-      toast({ title: 'Welcome to NexusPlay! 🎮', description: 'Your gaming identity is ready — now connect your platforms.' });
       setCelebrating(true);
     } catch (e) {
       toast({ title: 'Something went wrong', description: e.message, variant: 'destructive' });
@@ -126,12 +153,15 @@ export default function Onboarding() {
   const stepContent = () => {
     switch (step) {
       case 0: return <StepWelcome name={user?.display_name || user?.full_name} />;
-      case 1: return <StepPlatforms value={platforms} toggle={toggleArr(setPlatforms)} />;
-      case 2: return <StepGenres value={genres} toggle={toggleArr(setGenres)} />;
-      case 3: return <StepGames value={games} toggle={toggleArr(setGames)} addCustom={(t) => setGames((p) => [...p, t])} />;
-      case 4: return <StepConnect accounts={accounts} setAccounts={setAccounts} />;
-      case 5: return <StepGenerate selections={{ platforms, genres, games }} profile={profile} onGenerated={setProfile} />;
-      case 6: return <StepRecommend genres={genres} games={games} />;
+      case 1: return <StepUsername value={username} onChange={setUsername} />;
+      case 2: return <StepAvatar value={avatarUrl} onUpload={setAvatarUrl} />;
+      case 3: return <StepBanner value={bannerUrl} onUpload={setBannerUrl} onClear={() => setBannerUrl('')} />;
+      case 4: return <StepGames value={games} toggle={toggleArr(setGames)} addCustom={(t) => setGames((p) => [...p, t])} />;
+      case 5: return <StepGenres value={genres} toggle={toggleArr(setGenres)} />;
+      case 6: return <StepBio value={bio} onChange={setBio} />;
+      case 7: return <StepPersonality value={personality} onSelect={setPersonality} />;
+      case 8: return <StepConnect platforms={platforms} togglePlatform={toggleArr(setPlatforms)} accounts={accounts} setAccounts={setAccounts} />;
+      case 9: return <StepGenerate selections={{ platforms, genres, games, personality }} profile={profile} onGenerated={setProfile} />;
       default: return null;
     }
   };
@@ -165,16 +195,14 @@ export default function Onboarding() {
             {step < STEP_META.length - 1 ? (
               <>
                 {SKIPPABLE.has(step) && (
-                  <Button variant="ghost" onClick={() => { saveProgress(); setStep(step + 1); }} className="rounded-full text-muted-foreground">
-                    Skip
-                  </Button>
+                  <Button variant="ghost" onClick={next} className="rounded-full text-muted-foreground">Skip</Button>
                 )}
-                <Button onClick={() => { saveProgress(); setStep(step + 1); }} disabled={!canProceed} className="flex-1 rounded-full">
+                <Button onClick={next} disabled={!canProceed} className="flex-1 rounded-full">
                   Continue <ArrowRight className="w-4 h-4" />
                 </Button>
               </>
             ) : (
-              <Button onClick={finish} disabled={saving} className="flex-1 rounded-full">
+              <Button onClick={finish} disabled={saving || !profile} className="flex-1 rounded-full">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enter NexusPlay
               </Button>
             )}
@@ -186,8 +214,8 @@ export default function Onboarding() {
         <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
           <div className="max-w-md w-full text-center rounded-3xl border border-primary/30 bg-card/80 backdrop-blur-md p-8 shadow-2xl animate-scale-in">
             <div className="text-5xl mb-3">🎉</div>
-            <h2 className="text-2xl font-heading font-bold">Your gaming identity is complete.</h2>
-            <p className="text-sm text-muted-foreground mt-2">You've unlocked your profile badge, XP, and recommendations tuned to your taste. Now link your platforms to bring your history together.</p>
+            <h2 className="text-2xl font-heading font-bold">Your Gaming Identity is Ready.</h2>
+            <p className="text-sm text-muted-foreground mt-2">You've built your identity layer — now connect your platforms to bring your history together, and let the activity come to you.</p>
             <div className="grid grid-cols-3 gap-2 mt-5 text-xs">
               <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">🏆</div>Profile badge</div>
               <div className="rounded-xl border border-border bg-card/50 p-3"><div className="text-lg">⚡</div>XP earned</div>
