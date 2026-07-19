@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import MemoriesSection from '@/components/settings/MemoriesSection';
 import PrivacySection from '@/components/settings/PrivacySection';
 import NotificationsSection from '@/components/settings/NotificationsSection';
 import AccountSection from '@/components/settings/AccountSection';
+import AutoSyncHint from '@/components/settings/AutoSyncHint';
 import InviteSection from '@/components/settings/InviteSection';
 import { createNotification } from '@/lib/notifications';
 import { computeProfileCompletion, markActivatedIfNeeded, trackJourney } from '@/lib/journey';
@@ -36,6 +38,7 @@ const rarities = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
 
 export default function Settings() {
   const { user, checkUserAuth } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
@@ -102,6 +105,12 @@ export default function Settings() {
       setAccounts(accs); setAchievements(achs); setCollections(cols); setMilestones(ms); setTopLists(tls); setSetups(set); setMemories(mems);
     }).finally(() => setLoading(false));
   }, [user]);
+
+  // Soft gate: send users who started but haven't finished onboarding back to the wizard.
+  const needsOnboarding = user && user.onboarding_started && !user.has_onboarded;
+  useEffect(() => {
+    if (needsOnboarding) navigate('/onboarding', { replace: true });
+  }, [needsOnboarding, navigate]);
 
   const saveProfile = async () => {
     setSavingProfile(true);
@@ -192,6 +201,7 @@ export default function Settings() {
     setAchievements((a) => a.filter((x) => x.id !== id));
   };
 
+  if (needsOnboarding) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
@@ -269,6 +279,7 @@ export default function Settings() {
           <div className="space-y-2"><Label>Bio</Label><Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell others about yourself..." className="bg-secondary/30 resize-none" rows={3} /></div>
           <div className="space-y-2"><Label>Avatar</Label><AvatarUploader value={avatarUrl} onChange={setAvatarUrl} displayName={displayName} /></div>
           <div className="space-y-2"><Label>Profile Banner</Label><BannerUploader value={bannerUrl} onChange={setBannerUrl} themeBanner={PROFILE_THEMES[user?.profile_theme || 'nebula']?.banner} /></div>
+          <AutoSyncHint className="mb-1" />
           <div className="space-y-2"><Label>Favorite Games (comma separated)</Label><Input value={favoriteGames} onChange={(e) => setFavoriteGames(e.target.value)} placeholder="Elden Ring, Valorant..." className="bg-secondary/30" /></div>
           <div className="space-y-2"><Label>Favorite Franchises (comma separated)</Label><Input value={favoriteFranchises} onChange={(e) => setFavoriteFranchises(e.target.value)} placeholder="Final Fantasy, Halo..." className="bg-secondary/30" /></div>
           <div className="space-y-2"><Label>Gaming Quote / Tagline</Label><Input value={gamingQuote} onChange={(e) => setGamingQuote(e.target.value)} placeholder="A gamer without a history is just a player..." className="bg-secondary/30" /></div>
@@ -331,6 +342,7 @@ export default function Settings() {
         </div>
         {showAchForm && (
           <div className="rounded-2xl border border-border bg-card/50 p-5 space-y-3">
+            <AutoSyncHint />
             <div className="space-y-2"><Label className="text-xs">Title</Label><Input value={newAch.title} onChange={(e) => setNewAch({ ...newAch, title: e.target.value })} placeholder="Platinum Trophy" className="bg-secondary/30" /></div>
             <div className="space-y-2"><Label className="text-xs">Description</Label><Textarea value={newAch.description} onChange={(e) => setNewAch({ ...newAch, description: e.target.value })} placeholder="..." className="bg-secondary/30 resize-none" rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
