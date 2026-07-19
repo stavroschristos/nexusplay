@@ -82,15 +82,11 @@ export default function AccountSection() {
   const deleteAccount = async () => {
     setDeleting(true);
     try {
-      // Best-effort cleanup of personal content before removing the account.
-      const owned = [
-        base44.entities.GameAccount.filter({ created_by_id: user?.id }, '-created_date', 500).then((r) => base44.entities.GameAccount.deleteMany({ created_by_id: user?.id }).catch(() => {})),
-        base44.entities.Achievement.filter({ created_by_id: user?.id }, '-created_date', 500).then((r) => base44.entities.Achievement.deleteMany({ created_by_id: user?.id }).catch(() => {})),
-        base44.entities.Post.filter({ created_by_id: user?.id }, '-created_date', 500).then((r) => base44.entities.Post.deleteMany({ created_by_id: user?.id }).catch(() => {})),
-        base44.entities.Block.deleteMany({ created_by_id: user?.id }).catch(() => {}),
-      ];
-      await Promise.allSettled(owned);
-      await base44.auth.updateMe({ bio: '', avatar_url: '', banner_url: '', display_name: 'Deleted Gamer' });
+      // Full GDPR erasure runs server-side as the service role so it can also
+      // remove records the user doesn't own (others' follows/blocks toward
+      // them, reports about them, their presence and conversations).
+      await base44.functions.invoke('deleteUserData', { user_id: user?.id });
+      await base44.auth.updateMe({ bio: '', avatar_url: '', banner_url: '', display_name: 'Deleted Gamer', gamer_tag: '' });
       toast({ title: 'Account data cleared' });
       logout(false);
       navigate('/');
