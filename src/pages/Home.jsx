@@ -41,10 +41,10 @@ export default function Home() {
       const authorIds = [...new Set(res.map((p) => p.created_by_id))];
       const missing = authorIds.filter((id) => id && !authors[id]);
       if (missing.length > 0) {
-        const pubRes = await base44.functions.invoke('publicUsers', { action: 'list' });
-        const users = pubRes.data?.users || [];
+        const pubRes = await base44.functions.invoke('publicUsers', { action: 'get', ids: missing });
+        const fetched = pubRes.data?.users || {};
         const map = { ...authors };
-        users.forEach((u) => { map[u.id] = u; });
+        missing.forEach((id) => { if (fetched[id]) map[id] = fetched[id]; });
         setAuthors(map);
       }
     } finally {

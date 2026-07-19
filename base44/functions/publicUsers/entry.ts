@@ -76,6 +76,8 @@ Deno.serve(async (req) => {
       if (Array.isArray(ids) && ids.length > 0) {
         const found = {};
         for (const id of ids) {
+          const synthetic = syntheticAuthor(id);
+          if (synthetic) { found[id] = synthetic; continue; }
           try {
             const u = await base44.asServiceRole.entities.User.get(id);
             if (u) found[id] = sanitize(u);

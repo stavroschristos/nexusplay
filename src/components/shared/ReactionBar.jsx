@@ -32,25 +32,41 @@ export default function ReactionBar({ postId }) {
   const react = async (emoji) => {
     const prevReaction = myReaction;
     const prevId = myReactionId;
+    const sameToggle = prevReaction === emoji;
+    // optimistic update
+    if (sameToggle) {
+      setMyReaction(null); setMyReactionId(null);
+      setReactions((r) => ({ ...r, [emoji]: Math.max(0, (r[emoji] || 1) - 1) }));
+    } else {
+      if (prevId) setReactions((r) => ({ ...r, [prevReaction]: Math.max(0, (r[prevReaction] || 1) - 1) }));
+      setReactions((r) => ({ ...r, [emoji]: (r[emoji] || 0) + 1 }));
+      setMyReaction(emoji);
+    }
     try {
-      if (prevReaction === emoji) {
-        setMyReaction(null); setMyReactionId(null);
-        setReactions((r) => ({ ...r, [emoji]: Math.max(0, (r[emoji] || 1) - 1) }));
+      if (sameToggle) {
         if (prevId) await base44.entities.Reaction.delete(prevId);
       } else {
-        if (prevId) {
-          await base44.entities.Reaction.delete(prevId);
-          setReactions((r) => ({ ...r, [prevReaction]: Math.max(0, (r[prevReaction] || 1) - 1) }));
-        }
+        if (prevId) await base44.entities.Reaction.delete(prevId);
         const r = await base44.entities.Reaction.create({ post_id: postId, emoji });
-        setReactions((prev) => ({ ...prev, [emoji]: (prev[emoji] || 0) + 1 }));
-        setMyReaction(emoji);
         setMyReactionId(r.id);
       }
       setShowPicker(false);
     } catch {
+      // instant rollback to the previously confirmed state
+      setMyReaction(prevReaction);
+      setMyReactionId(prevId);
+      setReactions((r) => {
+        const next = { ...r };
+        if (sameToggle) {
+          next[emoji] = (next[emoji] || 0) + 1;
+        } else {
+          next[emoji] = Math.max(0, (next[emoji] || 1) - 1);
+          if (prevReaction) next[prevReaction] = (next[prevReaction] || 0) + 1;
+        }
+        return next;
+      });
       toast({ title: 'Failed to react', variant: 'destructive' });
-      load();
+      load(); // reconcile in case of partial failure (delete succeeded, create failed)
     }
   };
 
