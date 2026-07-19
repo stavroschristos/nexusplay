@@ -13,26 +13,22 @@ const navGroups = [
   {
     items: [
       { icon: Home, label: 'Home', path: '/home' },
-      { icon: Search, label: 'Search', path: '/search' },
-      { icon: Radio, label: 'Gaming Radar', path: '/radar' },
       { icon: Compass, label: 'Discover', path: '/explore' },
-    ],
-  },
-  {
-    items: [
-      { icon: Users, label: 'Communities', path: '/communities' },
       { icon: Gamepad, label: 'Games', path: '/games' },
-      { icon: Target, label: 'Challenges', path: '/challenges' },
+      { icon: Users, label: 'Communities', path: '/communities' },
+      { icon: MessagesSquare, label: 'Messages', path: '/messages' },
+      { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
+      { icon: Search, label: 'Search', path: '/search' },
     ],
   },
   {
+    secondary: true,
     items: [
-      { icon: Sparkles, label: 'AI Assistant', path: '/assistant' },
-      { icon: MessagesSquare, label: 'Messages', path: '/messages' },
+      { icon: Radio, label: 'Gaming Radar', path: '/radar' },
+      { icon: Target, label: 'Challenges', path: '/challenges' },
       { icon: Flame, label: 'Wrapped', path: '/wrapped' },
       { icon: Rocket, label: 'Roadmap', path: '/roadmap' },
       { icon: GitBranch, label: 'Changelog', path: '/changelog' },
-      { icon: Trophy, label: 'My Profile', path: '/profile' },
     ],
   },
 ];
@@ -86,7 +82,7 @@ export default function Layout() {
     maintenance: 'bg-destructive/10 border-destructive/30 text-destructive',
   };
 
-  const NavLink = ({ item, mobile = false }) => {
+  const NavLink = ({ item, mobile = false, secondary = false }) => {
     const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
     return (
       <Link
@@ -97,7 +93,9 @@ export default function Layout() {
             : 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative',
           active
             ? (mobile ? 'text-primary' : 'bg-primary text-primary-foreground glow')
-            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+            : secondary
+              ? 'text-muted-foreground/70 hover:text-foreground hover:bg-secondary/40'
+              : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
         )}
         aria-current={active ? 'page' : undefined}
       >
@@ -124,7 +122,8 @@ export default function Layout() {
         <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto scrollbar-thin">
           {allGroups.map((group, gi) => (
             <div key={gi} className="space-y-0.5">
-              {group.items.map((item) => <NavLink key={item.path} item={item} />)}
+              {group.secondary && <p className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">More</p>}
+              {group.items.map((item) => <NavLink key={item.path} item={item} secondary={group.secondary} />)}
             </div>
           ))}
           <div className="space-y-0.5 pt-2 border-t border-border/50">
