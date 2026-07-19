@@ -13,7 +13,7 @@ import SmartRecommendations from '@/components/onboarding/SmartRecommendations';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import { SkeletonFeed } from '@/components/shared/Skeleton';
-import { Sparkles, TrendingUp, Flame, Users, LayoutDashboard, MessageSquare, Compass, Target } from 'lucide-react';
+import { Sparkles, TrendingUp, Flame, Users, LayoutDashboard, MessageSquare, Compass, Target, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFounder } from '@/lib/founder';
 import FounderBadge from '@/components/profile/FounderBadge';
@@ -74,7 +74,7 @@ export default function Home() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[1fr_300px] gap-6">
       <div className="max-w-2xl w-full mx-auto lg:mx-0">
-        <PageHeader icon={Sparkles} title={user?.display_name ? `Hey, ${user.display_name.split(' ')[0]}` : 'Gamer Feed'} subtitle={view === 'dashboard' ? 'Your gaming identity, at a glance' : 'Activity from across your network'} />
+        <PageHeader icon={Sparkles} title={user?.display_name ? `Hey, ${user.display_name.split(' ')[0]}` : 'Gamer Feed'} subtitle={view === 'dashboard' ? 'Your gaming identity, at a glance' : 'Automatic activity from across your network'} />
 
         <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/50 border border-border">
           <button onClick={() => setView('dashboard')} className={cn('flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1.5', view === 'dashboard' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>
@@ -120,7 +120,16 @@ export default function Home() {
             {loading ? (
               <SkeletonFeed />
             ) : posts.length === 0 ? (
-              <EmptyState icon={Sparkles} title="No posts yet" description="Share a milestone or thought — your feed is the social pulse of your gaming identity." />
+              <EmptyState
+                icon={Sparkles}
+                title="Your activity will appear here"
+                description="Connect your platforms and NexusPlay automatically turns your gameplay into social moments — new games, achievements, platinums, and milestones. No manual posting required."
+                action={
+                  <Link to="/settings" className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
+                    Connect your platforms <ArrowRight className="w-4 h-4" />
+                  </Link>
+                }
+              />
             ) : (
               <div className="space-y-4 stagger">
                 {posts.map((post) => (
